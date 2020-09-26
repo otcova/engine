@@ -132,9 +132,21 @@ canvas.c.addEventListener("mousemove", function (e) {
     canvas.mouse.y = mY;
 }, true);
 
+function normalizeWheelSpeed(event) {
+    var normalized;
+    if (event.wheelDelta) {
+        normalized = (event.wheelDelta % 120 - 0) == -0 ? event.wheelDelta / 120 : event.wheelDelta / 12;
+    } else {
+        var rawAmmount = event.deltaY ? event.deltaY : event.detail;
+        normalized = -(rawAmmount % 3 ? rawAmmount * 10 : rawAmmount / 3);
+    }
+    return normalized*100;
+}
+
 canvas.c.addEventListener('wheel', function (e) { // zoom
+
     let pastScale = board.scale;
-    board.scale += board.scale * (20 / e.deltaY);
+    board.scale += board.scale * (20 / normalizeWheelSpeed(e));
     board.scale = parseInt(Math.min(501, Math.max(6, board.scale)));
     let badNumbers = [66, 41, 35, 32, 31, 26, 21, 20, 18, 16, 15, 13, 12];
     while (badNumbers.filter(n => n == board.scale).length != 0) board.scale += 1;
