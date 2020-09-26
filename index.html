@@ -1,0 +1,43 @@
+<meta name="viewport"
+    content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <title>Hola!!!</title>
+</head>
+
+<body>
+    <div id="topBar">
+        <button class="unselectText" id="title">Logic</button>
+        <button class="palet unselectText itemColor" id="pA0" onclick="selectPalet(0)">Select</button>
+        <button class="palet unselectText itemColor" id="pA1" onclick="selectPalet(1)">Eraser</button>
+        <button class="palet unselectText itemColor" id="pA2" onclick="selectPalet(2)">Wire</button>
+        <div class="separator" style="margin-left: 30px;"></div>
+        <canvas class="playButtons" id="stop" width=50 height=60></canvas>
+        <canvas class="playButtons" id="pause" width=50 height=60></canvas>
+        <canvas class="playButtons" id="play" width=50 height=60></canvas>
+        <canvas class="playButtons" id="step" width=50 height=60></canvas>
+    </div>
+    <div id="leftCont"></div>
+    <div id="content">
+        <canvas id="boardCanvasBackground"></canvas>
+        <canvas id="boardCanvasWires"></canvas>
+        <canvas id="boardCanvasObj"></canvas>
+        <canvas id="boardCanvasTemp"></canvas>
+    </div>
+</body>
+
+<script src="./js/zlib.js"></script>
+<script src="./js/png.js"></script>
+<script src="./js/emscripten-shared-arrays.js"></script>
+<script src="./js/utils.js"></script>
+<script src="./js/obj-types-manager.js"></script>
+<script src="./js/boardCanvas-manager.js"></script>
+<script src="./wasm/lab.js"></script>
+<script src="./js/board-wasm-manager.js"></script>
+<script src="./js/events-manager.js"></script>
+<script src="./js/css-manager.js"></script>
+
+</html>

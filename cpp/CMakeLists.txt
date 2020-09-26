@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.0)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Os -s ASSERTIONS=1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s EXPORTED_FUNCTIONS='['_malloc', '_free']'")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s EXPORTED_RUNTIME_METHODS='['ccall', 'cwrap']'")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s LLD_REPORT_UNDEFINED")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ASSERTIONS=1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s TOTAL_MEMORY=64MB")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
+
+project(pjPear)
+
+file(GLOB src_files "src/*.h" "src/*.cpp")
+add_executable(lab ${src_files})
+
+set_target_properties(lab PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../wasm")

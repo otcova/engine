@@ -1,0 +1,7 @@
+set -e
+cd "$(dirname "$0")/cmake-build-data"
+emcmake cmake ..
+echo ""
+echo "---"
+echo ""
+emmake make
