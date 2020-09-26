@@ -204,6 +204,20 @@ canvas {
     width: 25px;
     height: 25px;
     outline: 1px solid #000;
+    border-radius: 0;
+    border: none;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+#runSpeed::-moz-range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    outline: 1px solid #000;
+    border-radius: 0;
+    border: none;
     background: #4CAF50;
     cursor: pointer;
 }
