@@ -138,7 +138,7 @@ function keyPressEv(e) {
             let wiresMapMemoryPtr = Module.__saveWires();
             console.log("Saved: ", (Module.HEAP32[wiresMapMemoryPtr / (32 / 8)] / 1024).toPrecision(2) + "KB");
             let memory = new Uint8Array(Module.HEAP8.buffer, wiresMapMemoryPtr, Module.HEAP32[wiresMapMemoryPtr / (32 / 8)])
-            saveData(memory);
+            saveDataToFile("board.cir", memory);
             refreshAllCanvas();
         }
 

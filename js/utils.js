@@ -11,10 +11,10 @@ function getMousePos() {
 
 let blob = undefined;
 
-function saveData(data) {
+function saveDataToFile(name, data) {
 
     blob = new Blob([data], { type: "octet/stream" });
-    downloadBlob(blob, "board");
+    downloadBlob(blob, name);
 }
 
 

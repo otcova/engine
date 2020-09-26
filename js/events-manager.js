@@ -104,7 +104,7 @@ canvas.c.addEventListener("mouseup", function (e) {
 
 document.addEventListener("mousemove", function (e) {
     if (e.x < canvas.obj.offsetLeft || e.y < canvas.obj.offsetTop)
-        clearCanvasTemp();
+        refreshCanvasTemp();
 });
 
 canvas.c.addEventListener("mousemove", function (e) {
@@ -224,6 +224,16 @@ let lastRunInstance = 0;
 let notDrawCount = 0;
 let drawCount = 0;
 let runSpeed = 2;
+let sliderRunSpeed = document.getElementById("runSpeed");
+var sliderRunSpeedText = document.getElementById("runSpeedText");
+sliderRunSpeed.oninput = function () {
+    runSpeed = Math.round(this.value * this.value * this.value * this.value);
+    if (runSpeed === 0) sliderRunSpeedText.innerHTML = "speed snail";
+    else if (runSpeed === 1) sliderRunSpeedText.innerHTML = "speed turtle";
+    else if (runSpeed < 60) sliderRunSpeedText.innerHTML = "speed slow";
+    else if (runSpeed < 9999) sliderRunSpeedText.innerHTML = "speed fast";
+    else sliderRunSpeedText.innerHTML = "speed max";
+}
 
 Module.onRuntimeInitialized = function () {
     new Board("default");
@@ -234,14 +244,14 @@ Module.onRuntimeInitialized = function () {
         if (board.state == "play") {
             let now = performance.now();
             if (now - lastRunInstance < 50) {
-               for (let i = 0; i < runSpeed; i++) {
-                   board.runStep(false);
-                   notDrawCount++;
-               }
+                for (let i = 0; i < runSpeed; i++) {
+                    board.runStep(false);
+                    notDrawCount++;
+                }
             } else {
-               if (++drawCount % 30 == 0) console.log((notDrawCount / runSpeed) % 30, notDrawCount + drawCount);
-               board.runStep(true);
-               lastRunInstance = now;
+                if (++drawCount % 30 == 0) console.log((notDrawCount / runSpeed) % 30, notDrawCount + drawCount);
+                board.runStep(true);
+                lastRunInstance = now;
             }
         }
     }, 0);

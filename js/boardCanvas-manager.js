@@ -68,12 +68,9 @@ function refreshCanvasObj() {
     board.drawObjs();
 }
 
-function clearCanvasTemp() {
-    canvas.ctxt.clearRect(0, 0, canvas.temp.width, canvas.temp.height);
-}
 function refreshCanvasTemp() {
     refreshCanvasBackground();
-    clearCanvasTemp();
+    canvas.ctxt.clearRect(0, 0, canvas.temp.width, canvas.temp.height);
 
     if (select) {
         if (canvas.wireTemp != undefined)
