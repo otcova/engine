@@ -125,6 +125,9 @@ function keyPressEv(e) {
     }
     keyRepeatCount++;
 
+    if (e.key == "r" || e.key == "R") objModelIndex = Math.min(objModelIndex + 1, 16)
+    else if (e.key == "f" || e.key == "F") objModelIndex = Math.max(objModelIndex - 1, 2);
+
     if (!keyRepeat) {
         if (e.key == "1") selectPalet(0);
         else if (e.key == "2") selectPalet(1);
@@ -167,9 +170,6 @@ function keyPressEv(e) {
         else if (e.key == "a" || e.key == "A") rotateObjType(2);
         else if (e.key == "s" || e.key == "S") rotateObjType(3);
         else if (e.key == "d" || e.key == "D") rotateObjType(0);
-        else if (e.key == "r" || e.key == "R") objModelIndex = Math.min(objModelIndex+1, 16);
-        else if (e.key == "f" || e.key == "F") objModelIndex = Math.max(objModelIndex-1, 2);
-        else return;
     }
 
     refreshCanvasTemp();
@@ -177,7 +177,7 @@ function keyPressEv(e) {
 }
 
 function rotateObjType(r) {
-    let obj = objTypes[objNames.get(paletItems[paletIndex])];
+    let obj = objTypes[getObjByName(paletItems[paletIndex])];
     if (obj != undefined)
         obj.rotate = r;
 }
@@ -231,7 +231,7 @@ function playButtonOnClick() {
 let ctx = document.getElementById("pause").getContext("2d");
 addEventListener("init-env", () => {
     //Pause
-    
+
     ctx.canvas.hidden = true;
     ctx.canvas.addEventListener("mouseup", pauseButtonOnClick);
 
