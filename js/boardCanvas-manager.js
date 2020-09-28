@@ -139,7 +139,7 @@ function refreshCanvasTemp() {
             canvas.ctxt.fillRect(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
             canvas.ctxt.strokeRect(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
         } else {
-            let objID = objNames.get(paletItems[paletIndex]);
+            let objID = getObjByName(paletItems[paletIndex]);
             if (objID != undefined)
                 drawObj(canvas.wireTemp[1].x, canvas.wireTemp[1].y, undefined, objID, canvas.ctxt, !board.canAddObj(objID, canvas.wireTemp[1]));
         }
@@ -152,7 +152,8 @@ function refreshAllCanvas() {
     refreshCanvasObj();
     refreshCanvasTemp();
 }
-
-canvas.c = document.getElementById('content');
-canvas.leftBar = document.getElementById('leftCont');
-window.addEventListener('resize', resizeCanvas);
+addEventListener("init-env", () => {
+    canvas.c = document.getElementById('content');
+    canvas.leftBar = document.getElementById('leftBar');
+    window.addEventListener('resize', resizeCanvas);
+});

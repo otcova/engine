@@ -20,9 +20,19 @@
         <canvas class="playButtons" id="play" width=50 height=60></canvas>
         <canvas class="playButtons" id="step" width=50 height=60></canvas>
         <button class="unselectText buttonTxt" id="runSpeedText">speed slow</button>
-        <input type="range" min="0" max="10" step="0.005" value="2" class="slider" id="runSpeed">
+        <input type="range" min="0" max="9" step="0.005" value="2" class="slider" id="runSpeed">
     </div>
-    <div id="leftCont"></div>
+    <div id="leftCont">
+        <div id="leftBar"></div>
+        <!-- <div id="objConfigBar">
+            <button class="buttonTxt" id="objConfigBarTitle">Configuration</button>
+            <button id="objConfigOrient"></button>
+            <div id="objConfigToolsDiv">
+                <button class="buttonTxt" id="objConfigDropDownLabel">model: </button>
+                <input type="number" value="2" min="2" max="16" id="objConfigDropDown"></input>
+            </div>
+        </div> -->
+    </div>
     <div id="content">
         <canvas class="canvas" id="boardCanvasBackground"></canvas>
         <canvas class="canvas" id="boardCanvasWires"></canvas>
@@ -59,5 +69,7 @@ ctrl + s -> save board
 ctrl + z -> undo action
 ctrl + y -> reverse undo
 
--->
+r -> increes logic gate input size
+f -> decrees logic gate input size
 
+-->

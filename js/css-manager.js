@@ -6,7 +6,7 @@ let paletIndex = 0;
 let itemButtonSelected = undefined;
 
 function RefreshGUI() {
-    leftMenu = document.getElementById("leftCont");
+    leftMenu = document.getElementById("leftBar");
 
     for (const folderName of leftMenuData) {
         let folder = document.createElement("button");
@@ -104,9 +104,11 @@ function selectPalet(n, autoUnSelect) {
 let keyRepeat = false;
 let keyRepeatCount = 0;
 
-document.addEventListener('keydown', keyPressEv);
-document.addEventListener('keyup', () => { keyRepeat = false; keyRepeatCount = 0; });
-//document.addEventListener('keypress', (e) => { console.log(e.repeat); });
+addEventListener("init-env", () => {
+    document.addEventListener('keydown', keyPressEv);
+    document.addEventListener('keyup', () => { keyRepeat = false; keyRepeatCount = 0; });
+    //document.addEventListener('keypress', (e) => { console.log(e.repeat); });
+});
 
 function keyPressEv(e) {
 
@@ -165,6 +167,8 @@ function keyPressEv(e) {
         else if (e.key == "a" || e.key == "A") rotateObjType(2);
         else if (e.key == "s" || e.key == "S") rotateObjType(3);
         else if (e.key == "d" || e.key == "D") rotateObjType(0);
+        else if (e.key == "r" || e.key == "R") objModelIndex = Math.min(objModelIndex+1, 16);
+        else if (e.key == "f" || e.key == "F") objModelIndex = Math.max(objModelIndex-1, 2);
         else return;
     }
 
@@ -189,45 +193,6 @@ RefreshGUI();
 let w = 10;
 let h = 30;
 
-//Pause
-let ctx = document.getElementById("pause").getContext("2d");
-ctx.canvas.hidden = true;
-ctx.canvas.addEventListener("mouseup", pauseButtonOnClick);
-function pauseButtonOnClick() {
-    board.state = "pause";
-    board.runStep(true);
-    updateButtonsPlayStop();
-    refreshAllCanvas();
-}
-
-ctx.strokeStyle = "#333";
-ctx.fillStyle = "#3E3";
-
-ctx.fillRect(parseInt((ctx.canvas.width - w * 2.5) / 2), (ctx.canvas.height - h) / 2, w, h);
-ctx.strokeRect(parseInt((ctx.canvas.width - w * 2.5) / 2) + 0.5, (ctx.canvas.height - h) / 2 + 0.5, w, h);
-ctx.fillRect(parseInt((ctx.canvas.width - w * 2.5) / 2) + parseInt(w * 1.5) + 0.5, (ctx.canvas.height - h) / 2, w, h);
-ctx.strokeRect(parseInt((ctx.canvas.width - w * 2.5) / 2) + parseInt(w * 1.5) + 0.5, (ctx.canvas.height - h) / 2 + 0.5, w, h);
-
-//Stop
-ctx = document.getElementById("stop").getContext("2d");
-ctx.canvas.hidden = true;
-ctx.canvas.addEventListener("mouseup", stopButtonOnClick);
-function stopButtonOnClick() {
-    board.stopRun();
-}
-
-ctx.strokeStyle = "#222";
-ctx.fillStyle = "#E44";
-
-ctx.fillRect(ctx.canvas.width / 2 - h / 2 + 0.5, ctx.canvas.height / 2 - h / 2 + 0.5, h, h);
-ctx.strokeRect(ctx.canvas.width / 2 - h / 2 + 0.5, ctx.canvas.height / 2 - h / 2 + 0.5, h, h);
-ctx.fillStyle = "#444";
-ctx.strokeStyle = "#333";
-
-//Step
-ctx = document.getElementById("step").getContext("2d");
-ctx.canvas.hidden = true;
-ctx.canvas.addEventListener("mouseup", stepButtonOnClick);
 function stepButtonOnClick() {
     if (board.state == "edit") {
         board.initRun();
@@ -239,52 +204,16 @@ function stepButtonOnClick() {
     }
 }
 
-ctx.strokeStyle = "#333";
-ctx.fillStyle = "#3E3";
-
-ctx.fillRect(parseInt((ctx.canvas.width - w * 3.5) / 2), (ctx.canvas.height - h) / 2, w, h);
-ctx.strokeRect(parseInt((ctx.canvas.width - w * 3.5) / 2) + 0.5, (ctx.canvas.height - h) / 2 + 0.5, w, h);
-
-ctx.strokeStyle = "#000";
-ctx.lineWidth = 0.6;
-w = Math.sqrt(h * h - (h / 2) * (h / 2));
-let dw = (ctx.canvas.width - w) / 2;
-let dh = (ctx.canvas.height - h) / 2;
-
-ctx.beginPath();
-ctx.moveTo(parseInt(dw + w * 0.4) + 0.5, dh + 0.5);
-ctx.lineTo(parseInt(dw + w * 0.4) + 0.5, dh + h + 0.5);
-ctx.lineTo(parseInt(dw + w * 0.4) + 0.5 + w, ctx.canvas.height / 2 + 0.5);
-ctx.lineTo(parseInt(dw + w * 0.4), dh);
-ctx.fill();
-ctx.stroke();
-
-//Play
-ctx = document.getElementById("play").getContext("2d");
-ctx.canvas.hidden = true;
-ctx.canvas.addEventListener("mouseup", playButtonOnClick);
-function playButtonOnClick() {
-    if (board.state == "edit") board.initRun();
-    board.state = "play";
-    updateButtonsPlayStop();
-    selectPalet(2);
+function stopButtonOnClick() {
+    board.stopRun();
 }
 
-ctx.strokeStyle = "#000";
-ctx.lineWidth = 0.6;
-ctx.fillStyle = "#3E3";
-
-w = Math.sqrt(h * h - (h / 2) * (h / 2));
-dw = (ctx.canvas.width - w) / 2;
-dh = (ctx.canvas.height - h) / 2;
-
-ctx.beginPath();
-ctx.moveTo(dw + 0.5, dh + 0.5);
-ctx.lineTo(dw + 0.5, dh + h + 0.5);
-ctx.lineTo(dw + 0.5 + w, ctx.canvas.height / 2 + 0.5);
-ctx.lineTo(dw, dh);
-ctx.fill();
-ctx.stroke();
+function pauseButtonOnClick() {
+    board.state = "pause";
+    board.runStep(true);
+    updateButtonsPlayStop();
+    refreshAllCanvas();
+}
 
 function updateButtonsPlayStop() {
     document.getElementById("stop").hidden = !(board.state == "play" || board.state == "pause");
@@ -292,3 +221,91 @@ function updateButtonsPlayStop() {
     document.getElementById("step").hidden = !(board.state == "edit" || board.state == "pause");
     document.getElementById("play").hidden = !(board.state == "edit" || board.state == "pause");
 }
+
+function playButtonOnClick() {
+    if (board.state == "edit") board.initRun();
+    board.state = "play";
+    updateButtonsPlayStop();
+    selectPalet(2);
+}
+let ctx = document.getElementById("pause").getContext("2d");
+addEventListener("init-env", () => {
+    //Pause
+    
+    ctx.canvas.hidden = true;
+    ctx.canvas.addEventListener("mouseup", pauseButtonOnClick);
+
+
+
+    ctx.strokeStyle = "#333";
+    ctx.fillStyle = "#3E3";
+
+    ctx.fillRect(parseInt((ctx.canvas.width - w * 2.5) / 2), (ctx.canvas.height - h) / 2, w, h);
+    ctx.strokeRect(parseInt((ctx.canvas.width - w * 2.5) / 2) + 0.5, (ctx.canvas.height - h) / 2 + 0.5, w, h);
+    ctx.fillRect(parseInt((ctx.canvas.width - w * 2.5) / 2) + parseInt(w * 1.5) + 0.5, (ctx.canvas.height - h) / 2, w, h);
+    ctx.strokeRect(parseInt((ctx.canvas.width - w * 2.5) / 2) + parseInt(w * 1.5) + 0.5, (ctx.canvas.height - h) / 2 + 0.5, w, h);
+
+    //Stop
+    ctx = document.getElementById("stop").getContext("2d");
+    ctx.canvas.hidden = true;
+    ctx.canvas.addEventListener("mouseup", stopButtonOnClick);
+
+
+
+    ctx.strokeStyle = "#222";
+    ctx.fillStyle = "#E44";
+
+    ctx.fillRect(ctx.canvas.width / 2 - h / 2 + 0.5, ctx.canvas.height / 2 - h / 2 + 0.5, h, h);
+    ctx.strokeRect(ctx.canvas.width / 2 - h / 2 + 0.5, ctx.canvas.height / 2 - h / 2 + 0.5, h, h);
+    ctx.fillStyle = "#444";
+    ctx.strokeStyle = "#333";
+
+    //Step
+    ctx = document.getElementById("step").getContext("2d");
+    ctx.canvas.hidden = true;
+    ctx.canvas.addEventListener("mouseup", stepButtonOnClick);
+
+
+    ctx.strokeStyle = "#333";
+    ctx.fillStyle = "#3E3";
+
+    ctx.fillRect(parseInt((ctx.canvas.width - w * 3.5) / 2), (ctx.canvas.height - h) / 2, w, h);
+    ctx.strokeRect(parseInt((ctx.canvas.width - w * 3.5) / 2) + 0.5, (ctx.canvas.height - h) / 2 + 0.5, w, h);
+
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 0.6;
+    w = Math.sqrt(h * h - (h / 2) * (h / 2));
+    let dw = (ctx.canvas.width - w) / 2;
+    let dh = (ctx.canvas.height - h) / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(parseInt(dw + w * 0.4) + 0.5, dh + 0.5);
+    ctx.lineTo(parseInt(dw + w * 0.4) + 0.5, dh + h + 0.5);
+    ctx.lineTo(parseInt(dw + w * 0.4) + 0.5 + w, ctx.canvas.height / 2 + 0.5);
+    ctx.lineTo(parseInt(dw + w * 0.4), dh);
+    ctx.fill();
+    ctx.stroke();
+
+    //Play
+    ctx = document.getElementById("play").getContext("2d");
+    ctx.canvas.hidden = true;
+    ctx.canvas.addEventListener("mouseup", playButtonOnClick);
+
+
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 0.6;
+    ctx.fillStyle = "#3E3";
+
+    w = Math.sqrt(h * h - (h / 2) * (h / 2));
+    dw = (ctx.canvas.width - w) / 2;
+    dh = (ctx.canvas.height - h) / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(dw + 0.5, dh + 0.5);
+    ctx.lineTo(dw + 0.5, dh + h + 0.5);
+    ctx.lineTo(dw + 0.5 + w, ctx.canvas.height / 2 + 0.5);
+    ctx.lineTo(dw, dh);
+    ctx.fill();
+    ctx.stroke();
+});
+

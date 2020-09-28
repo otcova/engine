@@ -40,8 +40,8 @@ class Board {
     }
 
     addWire(pa, pb, pc) {
-        Module.__setWire(this.boardID, true, pa.x, pa.y, pb.x, pb.y, pc.x, pc.y);
-        this.stopRun();
+        if (this.state == "edit")
+            Module.__setWire(this.boardID, true, pa.x, pa.y, pb.x, pb.y, pc.x, pc.y);
     }
 
     canAddWire(pa, pb, pc) {

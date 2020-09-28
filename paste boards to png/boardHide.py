@@ -1,8 +1,5 @@
-
-
-
-img = "capture.png"
-boardData = "board"
+img = input("image: ").replace('"', '')
+boardData = input("board: ").replace('"', '')
 
 result = "myboard.png"
 

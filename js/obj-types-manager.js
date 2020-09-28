@@ -1,3 +1,4 @@
+let objModelIndex = 2;
 let leftMenuData = [
     ["Input", ["Switch", "Clock"]],
     ["Output", ["Led", "Display", "Color Led"]],
@@ -9,28 +10,34 @@ let leftMenuData = [
 let objNames = new Map();
 let objTypes = [];
 
-objNames.set("And", objTypes.length); // 0
+function getObjByName(name) {
+    let obj = objNames.get(name);
+    if (obj != undefined) return obj;
+    return objNames.get(name + objModelIndex);
+}
+
+objNames.set("AndDeprecated", objTypes.length); // 0
 objTypes.push({
-    name: "And", w: 1, h: 1,
+    name: "AndDeprecated", w: 1, h: 1,
     wires: [{ dir: "left", pos: 0 }, { dir: "left", pos: 1 }, { dir: "right", pos: 0 }],
     text: [{ txt: "&", x: 0.5, y: 0.5 }]
 });
 
-objNames.set("Or", objTypes.length); // 1
+objNames.set("OrDeprecated", objTypes.length); // 1
 objTypes.push({
-    name: "Or", w: 1, h: 1,
+    name: "OrDeprecated", w: 1, h: 1,
     wires: [{ dir: "left", pos: 0 }, { dir: "left", pos: 1 }, { dir: "right", pos: 0 }],
     text: [{ txt: "≥1", x: 0.5, y: 0.5 }]
 });
 
-objNames.set("XOr", objTypes.length);
+objNames.set("XOrDeprecated", objTypes.length); // 2
 objTypes.push({
-    name: "XOr", w: 1, h: 1,
+    name: "XOrDeprecated", w: 1, h: 1,
     wires: [{ dir: "left", pos: 0 }, { dir: "left", pos: 1 }, { dir: "right", pos: 0 }],
     text: [{ txt: "=1", x: 0.5, y: 0.5 }]
 });
 
-objNames.set("Not", objTypes.length);
+objNames.set("Not", objTypes.length); // 3
 objTypes.push({
     name: "Not", w: 1, h: 0,
     wires: [{ dir: "left", pos: 0 }, { dir: "right", pos: 0, not: true }],
@@ -96,16 +103,39 @@ objTypes.push({
     text: [{ txt: "FF", x: 0.5, y: 0.5 }]
 });
 
-objNames.set("Gated RS latch", objTypes.length);
+objNames.set("Gated RS latch", objTypes.length);// 12
 objTypes.push({
     name: "Gated RS latch", w: 1, h: 2,
     wires: [{ dir: "left", pos: 0, txt: "S" }, { dir: "left", pos: 1, clk: true }, { dir: "left", pos: 2, txt: "R" }, { dir: "right", pos: 0, txt: "Q" }],
     text: [{ txt: "RS", x: 0.5, y: 1 }]
 });
 
-objNames.set("RS latch", objTypes.length);
+objNames.set("RS latch", objTypes.length);// 13
 objTypes.push({
     name: "RS latch", w: 1, h: 1,
     wires: [{ dir: "right", pos: 0, txt: "Q" }, { dir: "left", pos: 0, txt: "S" }, { dir: "left", pos: 1, txt: "R" }],
     text: [{ txt: "RS", x: 0.5, y: 0.5 }]
 });
+
+// extra
+
+function logic_generator(name, sign, size) {
+    name += `${size}`
+    objNames.set(name, objTypes.length);
+    let comp = {
+        name: name, w: 1, h: size - 1,
+        wires: [],
+        text: [{ txt: sign, x: 0.5, y: (size - 1) / 2 }]
+    };
+    for (let i = 0; i < size; i++)
+        comp.wires.push({ dir: "left", pos: i });
+    comp.wires.push({ dir: "right", pos: 0 });
+    objTypes.push(comp);
+}
+
+for (let i = 2; i <= 16; i++)
+    logic_generator("And", "&", i);
+for (let i = 2; i <= 16; i++)
+    logic_generator("Or", "≥1", i);
+for (let i = 2; i <= 16; i++)
+    logic_generator("XOr", "=1", i);
