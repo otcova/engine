@@ -110,6 +110,22 @@ bool canAddSegWire(int x, int y, int d)
     return true;
 }
 
+bool canAddAllSegWire(Pos topLeftCh, Pos bottomRightCh) {
+    for (int chx = topLeftCh.x - 1; chx <= bottomRightCh.x; chx++)
+    for (int chy = topLeftCh.y - 1; chy <= bottomRightCh.y; chy++)
+    {
+        std::map<int64_t, ObjChunk>::iterator wchIt = board.objsMap.find(Pos(chx, chy).hash());
+        if (wchIt != board.objsMap.end()) {
+            for (int i = 0; i < wchIt->second.objs.size(); i++) {
+                if (objWiresCollision(wchIt->second.objs[i])) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 bool canAddWire(int boardID, int ax, int ay, int bx, int by, int cx, int cy)
 {
     if (ay == by) {
@@ -706,12 +722,13 @@ bool canUnSelect()
             return false;
     }
     
-    for (const auto& w : selectedWires) {
-        if (!canAddSegWire(w.x, w.y, w.d))
-            return false;
-    }
+    for (const auto& w : selectedWires)
+        board.getWire(w.x, w.y, w.d).flip();
+    bool res = canAddAllSegWire(board.getObjChunkCoords(selectedX, selectedY), board.getObjChunkCoords(selectedX + selectedW, selectedY + selectedH));
+    for (const auto& w : selectedWires)
+        board.getWire(w.x, w.y, w.d).flip();
 
-    return true;
+    return res;
 }
 
 void unSelect()
