@@ -9,7 +9,8 @@ addEventListener("init-env", () => {
     });
 
     document.addEventListener("mouseup", function (e) {
-        //canvas.wireTemp = undefined;
+        if (e.button == 0)
+            canvas.wireTemp = undefined;
         refreshCanvasTemp();
     });
 

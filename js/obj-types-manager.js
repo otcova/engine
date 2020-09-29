@@ -37,9 +37,9 @@ objTypes.push({
 
 objNames.set("1 Bit", objTypes.length);// 1
 objTypes.push({
-    name: "1 Bit", w: 1, h: 2,
-    wires: [{ dir: "right", pos: 0, txt: "Q" }, { dir: "left", pos: 0, txt: "D" }, { dir: "left", pos: 1, txt: "S" }, { dir: "left", pos: 2, txt: "G" }],
-    text: [{ txt: "1b", x: 0.5, y: 1 }]
+    name: "1 Bit", w: 1, h: 3,
+    wires: [{ dir: "right", pos: 0, txt: "Q" }, { dir: "left", pos: 0, txt: "A" }, { dir: "left", pos: 1, txt: "D" }, { dir: "left", pos: 2, txt: "S" }, { dir: "left", pos: 3, txt: "R" }],
+    text: [{ txt: "1b", x: 0.5, y: 1.5 }]
 });
 
 objNames.set("XOrDeprecated", objTypes.length); // 2

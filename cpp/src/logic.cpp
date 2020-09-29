@@ -129,7 +129,8 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 	case 0: //Button
 		if (obj.memory.size() == 0)
 			obj.memory.push_back(0);
-		else if (obj.memory[0] > 0) {
+		else if (obj.memory[0] > 0)
+		{
 			obj.memory[0] -= 1;
 			drawObj(obj);
 		}
@@ -141,18 +142,18 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 	case 1: //1 Bit
 	{
 		if (obj.memory.size() == 0)
-		{
 			obj.memory.push_back(0);
-			obj.memory.push_back(0);
-		}
-		int clk = get(b, grupsGet, obj, objt, 2);
-		if (!obj.memory[1] && clk)
+			
+		if (get(b, grupsGet, obj, objt, 4))
 		{
-			obj.memory[0] = get(b, grupsGet, obj, objt, 1);
+			obj.memory[0] = 0;
 		}
-		obj.memory[1] = clk;
-		if (get(b, grupsGet, obj, objt, 3))
+		else if (get(b, grupsGet, obj, objt, 1))
+		{
+			if (get(b, grupsGet, obj, objt, 3))
+				obj.memory[0] = get(b, grupsGet, obj, objt, 2);
 			set(b, grupsSet, obj, objt, 0, obj.memory[0]);
+		}
 		return;
 	}
 	case 2: //XOr
@@ -333,15 +334,33 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 	else if (obj.typeID >= 59 && obj.typeID <= 63) // XOr {x}
 	{
 		char number = 0;
-		
+
 		int size = obj.typeID - 57;
 
-		if (get(b, grupsGet, obj, objt, 0)) number |= 0b1; 
-		if (get(b, grupsGet, obj, objt, 1)) number |= 0b10; 
-		if (size >= 3) { if (get(b, grupsGet, obj, objt, 2)) number |= 0b100; }
-		if (size >= 4) { if (get(b, grupsGet, obj, objt, 3)) number |= 0b1000; }
-		if (size >= 5) { if (get(b, grupsGet, obj, objt, 3)) number |= 0b10000; }
-		if (size >= 6) { if (get(b, grupsGet, obj, objt, 3)) number |= 0b100000; }
+		if (get(b, grupsGet, obj, objt, 0))
+			number |= 0b1;
+		if (get(b, grupsGet, obj, objt, 1))
+			number |= 0b10;
+		if (size >= 3)
+		{
+			if (get(b, grupsGet, obj, objt, 2))
+				number |= 0b100;
+		}
+		if (size >= 4)
+		{
+			if (get(b, grupsGet, obj, objt, 3))
+				number |= 0b1000;
+		}
+		if (size >= 5)
+		{
+			if (get(b, grupsGet, obj, objt, 3))
+				number |= 0b10000;
+		}
+		if (size >= 6)
+		{
+			if (get(b, grupsGet, obj, objt, 3))
+				number |= 0b100000;
+		}
 
 		set(b, grupsSet, obj, objt, size + number, true);
 	}
