@@ -1,7 +1,7 @@
 let objModelIndex = 2;
 let leftMenuData = [
     ["Input", ["Switch", "Button", "Clock"]],
-    ["Output", ["Led", "Display", "Color Led"]],
+    ["Output", ["Led", "Display", "Color Led", "Point Display"]],
     ["Logic", ["And", "Or", "XOr", "Not", "Decoder"]],
     ["Maths", ["Half adder", "Full adder"]],
     ["Memory", ["1 Bit", "D flip-flop", "Gated RS latch", "RS latch"]]
@@ -97,14 +97,14 @@ objTypes.push({
 objNames.set("Half adder", objTypes.length); // 9
 objTypes.push({
     name: "Half adder", w: 1, h: 1,
-    wires: [{ dir: "left", pos: 0 }, { dir: "left", pos: 1 }, { dir: "right", pos: 0 }, { dir: "right", pos: 1 }],
+    wires: [{ dir: "left", pos: 0 }, { dir: "left", pos: 1 }, { dir: "right", pos: 0 }, { dir: "right", pos: 1, txt: "C" }],
     text: [{ txt: "HA", x: 0.5, y: 0.5 }]
 });
 
 objNames.set("Full adder", objTypes.length); // 10
 objTypes.push({
     name: "Full adder", w: 1, h: 2,
-    wires: [{ dir: "left", pos: 0 }, { dir: "left", pos: 1 }, { dir: "left", pos: 2 }, { dir: "right", pos: 0 }, { dir: "right", pos: 1 }],
+    wires: [{ dir: "left", pos: 0 }, { dir: "left", pos: 1 }, { dir: "left", pos: 2 }, { dir: "right", pos: 0 }, { dir: "right", pos: 1, txt: "C" }],
     text: [{ txt: "FA", x: 0.5, y: 1 }]
 });
 
@@ -156,7 +156,7 @@ for (let size = 2; size <= 6; size++) { // Decoder
     let name = "Decoder" + size;
     objNames.set(name, objTypes.length);
     let comp = {
-        name: name, w: 2, h: Math.pow(2, size) -1,
+        name: name, w: 2, h: Math.pow(2, size) - 1,
         wires: [],
         text: [{ txt: "DCODE", x: 1, y: 0 }]
     };
@@ -167,3 +167,16 @@ for (let size = 2; size <= 6; size++) { // Decoder
         comp.wires.push({ dir: "right", pos: i });
     objTypes.push(comp);
 }
+
+objNames.set("Point Display", objTypes.length);
+let comp = {
+    name: "Point Display", w: 9, h: 9,
+    wires: [{ dir: "down", pos: 1, txt: "R" }, { dir: "down", pos: 2, txt: "S" }],
+    leds: []
+};
+for (let y = 0; y < 8; y++)
+    for (let x = 0; x < 8; x++)
+        comp.leds.push({ x: x + 0.8, y: y + 0.8, w: 1.4, h: 1.4 });
+for (let i = 0; i < 6; i++)
+    comp.wires.push({ dir: "down", pos: 3 + i, txt: 1 << i });
+objTypes.push(comp);

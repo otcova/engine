@@ -101,7 +101,7 @@ inline bool get(Board &board, std::vector<bool> &grups, const Obj &obj, const Ob
 	cType.rotate(objt, obj.rotate);
 	int g = board.getWireGrup(obj.x + cType.x, obj.y + cType.y, cType.d);
 	if (g == -1)
-		return false;
+		return obj.wireNot[index];
 	return grups[g] != obj.wireNot[index];
 }
 
@@ -333,35 +333,46 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 	}
 	else if (obj.typeID >= 59 && obj.typeID <= 63) // XOr {x}
 	{
-		char number = 0;
+		unsigned char number = 0;
 
 		int size = obj.typeID - 57;
 
-		if (get(b, grupsGet, obj, objt, 0))
-			number |= 0b1;
-		if (get(b, grupsGet, obj, objt, 1))
-			number |= 0b10;
+		if (get(b, grupsGet, obj, objt, 0)) number |= 0b1;
+		if (get(b, grupsGet, obj, objt, 1)) number |= 0b10;
+
 		if (size >= 3)
-		{
-			if (get(b, grupsGet, obj, objt, 2))
-				number |= 0b100;
-		}
+			if (get(b, grupsGet, obj, objt, 2)) number |= 0b100;
 		if (size >= 4)
-		{
-			if (get(b, grupsGet, obj, objt, 3))
-				number |= 0b1000;
-		}
+			if (get(b, grupsGet, obj, objt, 3)) number |= 0b1000;
 		if (size >= 5)
-		{
-			if (get(b, grupsGet, obj, objt, 3))
-				number |= 0b10000;
-		}
+			if (get(b, grupsGet, obj, objt, 4)) number |= 0b10000;
 		if (size >= 6)
-		{
-			if (get(b, grupsGet, obj, objt, 3))
-				number |= 0b100000;
-		}
+			if (get(b, grupsGet, obj, objt, 5)) number |= 0b100000;
 
 		set(b, grupsSet, obj, objt, size + number, true);
+	}
+	else if (obj.typeID == 64) // Point Display
+	{
+		if (obj.memory.size() == 0) {
+			for (int i = 0; i < 64; i++)
+				obj.memory.push_back(0);
+		}
+		if (get(b, grupsGet, obj, objt, 0)) {
+			for (int i = 0; i < 64; i++)
+				obj.memory[i] = 0;
+			drawObj(obj);
+		} else if (get(b, grupsGet, obj, objt, 1)) {
+			unsigned char number = 0;
+			if (get(b, grupsGet, obj, objt, 2)) number |= 0b1;
+			if (get(b, grupsGet, obj, objt, 3)) number |= 0b10;
+			if (get(b, grupsGet, obj, objt, 4)) number |= 0b100;
+			if (get(b, grupsGet, obj, objt, 5)) number |= 0b1000;
+			if (get(b, grupsGet, obj, objt, 6)) number |= 0b10000;
+			if (get(b, grupsGet, obj, objt, 7)) number |= 0b100000;
+			if (obj.memory[number] == 0) {
+				obj.memory[number] = 7;
+				drawObj(obj);
+			}
+		}
 	}
 }

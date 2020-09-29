@@ -1,6 +1,13 @@
 
 /*
 
+in-arrow-up
+in-arrow-down
+in-arrow-left
+in-arrow-right
+
+
+
 
 Data Registers (16):
     d0: CoinPos
