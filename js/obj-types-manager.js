@@ -14,17 +14,17 @@ function getObjByName(name) {
     let obj = objNames.get(name);
     if (obj != undefined) return obj;
     if (name != "Decoder") return objNames.get(name + objModelIndex);
-    return objNames.get(name + Math.min(objModelIndex, 4));
+    return objNames.get(name + Math.min(objModelIndex, 6));
 }
 
 function increesObjModelIndex() {
-    if (paletItems[paletIndex] == "Decoder") objModelIndex = Math.min(objModelIndex + 1, 4);
+    if (paletItems[paletIndex] == "Decoder") objModelIndex = Math.min(objModelIndex + 1, 6);
     else objModelIndex = Math.min(objModelIndex + 1, 16);
 }
 
 function decreesObjModelIndex() {
     objModelIndex = Math.max(objModelIndex - 1, 2);
-    if (paletItems[paletIndex] == "Decoder") objModelIndex = Math.min(objModelIndex, 4);
+    if (paletItems[paletIndex] == "Decoder") objModelIndex = Math.min(objModelIndex, 6);
 }
 
 
@@ -152,7 +152,7 @@ for (let i = 2; i <= 16; i++)
 for (let i = 2; i <= 16; i++)
     logic_generator("XOr", "=1", i);
 
-for (let size = 2; size <= 4; size++) { // Decoder
+for (let size = 2; size <= 6; size++) { // Decoder
     let name = "Decoder" + size;
     objNames.set(name, objTypes.length);
     let comp = {

@@ -330,16 +330,18 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			res = res != get(b, grupsGet, obj, objt, i);
 		set(b, grupsSet, obj, objt, obj.typeID - 42, res);
 	}
-	else if (obj.typeID >= 59 && obj.typeID <= 61) // XOr {x}
+	else if (obj.typeID >= 59 && obj.typeID <= 63) // XOr {x}
 	{
 		char number = 0;
 		
 		int size = obj.typeID - 57;
 
-		if (get(b, grupsGet, obj, objt, 0)) number |= 0b0001; 
-		if (get(b, grupsGet, obj, objt, 1)) number |= 0b0010; 
-		if (size >= 3) { if (get(b, grupsGet, obj, objt, 2)) number |= 0b0100; }
+		if (get(b, grupsGet, obj, objt, 0)) number |= 0b1; 
+		if (get(b, grupsGet, obj, objt, 1)) number |= 0b10; 
+		if (size >= 3) { if (get(b, grupsGet, obj, objt, 2)) number |= 0b100; }
 		if (size >= 4) { if (get(b, grupsGet, obj, objt, 3)) number |= 0b1000; }
+		if (size >= 5) { if (get(b, grupsGet, obj, objt, 3)) number |= 0b10000; }
+		if (size >= 6) { if (get(b, grupsGet, obj, objt, 3)) number |= 0b100000; }
 
 		set(b, grupsSet, obj, objt, size + number, true);
 	}
