@@ -9,7 +9,7 @@ addEventListener("init-env", () => {
     });
 
     document.addEventListener("mouseup", function (e) {
-        canvas.wireTemp = undefined;
+        //canvas.wireTemp = undefined;
         refreshCanvasTemp();
     });
 
@@ -149,7 +149,7 @@ addEventListener("init-env", () => {
 
         let pastScale = board.scale;
         board.scale += board.scale * (20 / normalizeWheelSpeed(e));
-        board.scale = parseInt(Math.min(501, Math.max(6, board.scale)));
+        board.scale = Math.round(Math.min(501, Math.max(5, board.scale)));
         let badNumbers = [66, 41, 35, 32, 31, 26, 21, 20, 18, 16, 15, 13, 12];
         while (badNumbers.filter(n => n == board.scale).length != 0) board.scale += 1;
         let scaleRatio = board.scale / pastScale;

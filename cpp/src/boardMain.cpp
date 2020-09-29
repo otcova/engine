@@ -265,7 +265,6 @@ void swapNode(int boardID, int x, int y, bool makeUndo)
 void drawWires(int boardID, double scale, double rectX, double rectY, double rectW, double rectH)
 {
     EM_ASM(canvas.ctxw.fillStyle = "#3E3");
-
     Pos chA = board.getWireChunkCoords(rectX, rectY);
     Pos chB = board.getWireChunkCoords(rectX + rectW, rectY + rectH);
 
@@ -274,8 +273,8 @@ void drawWires(int boardID, double scale, double rectX, double rectY, double rec
             canvas.ctxw.lineWidth = $0;
             canvas.ctxw.beginPath();
             }, style * 2 + 1);
-        for (int chx = chA.x; chx <= chB.x; chx++)
-        for (int chy = chA.y; chy <= chB.y; chy++)
+        for (int chx = chA.x - 1; chx <= chB.x; chx++)
+        for (int chy = chA.y - 1; chy <= chB.y; chy++)
         {
             std::map<int64_t, WireChunk>::iterator wchIt = board.wiresMap.find(Pos(chx, chy).hash());
             if (wchIt != board.wiresMap.end()) {
