@@ -214,7 +214,7 @@ addEventListener("init-env", () => {
                     arr[b] = n;
                 }
                 board.stopRun();
-                Module.__loadWires(arr.byteOffset);
+                Module.__loadBoard(arr.byteOffset);
                 console.log("Loaded: ", (memorySize / 1024).toPrecision(2) + "KB");
                 deleteSharedArray(arr);
             }
@@ -225,7 +225,7 @@ addEventListener("init-env", () => {
                 arr[i] = view[i];
             }
             board.stopRun();
-            Module.__loadWires(arr.byteOffset);
+            Module.__loadBoard(arr.byteOffset);
             console.log("Loaded: ", (reader.result.byteLength / 1024).toPrecision(2) + "KB");
             deleteSharedArray(arr);
         }

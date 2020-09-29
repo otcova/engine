@@ -140,7 +140,7 @@ function keyPressEv(e) {
         else if (e.key == "9") selectPalet(8);
 
         else if (e.key == "s" && e.ctrlKey) {
-            let wiresMapMemoryPtr = Module.__saveWires();
+            let wiresMapMemoryPtr = Module.__saveBoard();
             console.log("Saved: ", (Module.HEAP32[wiresMapMemoryPtr / (32 / 8)] / 1024).toPrecision(2) + "KB");
             let memory = new Uint8Array(Module.HEAP8.buffer, wiresMapMemoryPtr, Module.HEAP32[wiresMapMemoryPtr / (32 / 8)])
             saveDataToFile("board.cir", memory);

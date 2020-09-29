@@ -105,7 +105,7 @@ function loadPngBoard(url) {
             imgArr[b] = n;
         }
         board.stopRun();
-        Module.__loadWires(imgArr.byteOffset);
+        Module.__loadBoard(imgArr.byteOffset);
         refreshAllCanvas();
     });
 }*/

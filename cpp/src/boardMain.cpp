@@ -913,7 +913,7 @@ void myCopy(const char* srcS, const char* srcB, char* dts) {
 }*/
 
 
-void LoadWiresMap(void* datav) {
+void LoadBoard(void* datav) {
     char* data = (char*)datav;
     board.objsMap.clear();
     board.wiresMap.clear();
@@ -944,22 +944,24 @@ void LoadWiresMap(void* datav) {
             pair.second.objs.emplace_back(((int*)data)[0], ((int*)data)[1], ((int*)data)[2], ((int*)data)[3]);
             data += sizeof(int) * 4;
             for (int wni = 0; wni < pair.second.objs[i].wireNot.size(); wni++) {
-                pair.second.objs[i].wireNot[wni] = (data[wni / 8] >> (7 - (wni & 0x7)) & 0x1);
+                pair.second.objs[i].wireNot[wni] = *data;
+                data += sizeof(char);
+                //pair.second.objs[i].wireNot[wni] = (data[wni / 8] >> (7 - (wni & 0x7)) & 0x1);
             }
-            data += (pair.second.objs[i].wireNot.size() - 1) / 8 + 1;
+            //data += (pair.second.objs[i].wireNot.size()) / 8 + 1;
         }
         board.objsMap.insert(pair);
     }
 
 }
 
-void* SaveWiresMap() {
+void* SaveBoard() {
     int32_t wiresMemorySize = board.wiresMap.size() * sizeof(std::pair<int64_t, StoreWireChunk>);
     int32_t objMemorySize = board.objsMap.size() * (sizeof(int) + sizeof(int64_t));
     for (const auto& [chPos, oCh] : board.objsMap) {
         objMemorySize += oCh.objs.size() * 4 * sizeof(int);
         for (int oi = 0; oi < oCh.objs.size(); oi++) {
-            objMemorySize += (oCh.objs[oi].wireNot.size() - 1) / 8 + 1;
+            objMemorySize += oCh.objs[oi].wireNot.size() * sizeof(char);
         }
     }
     const int32_t dataSize = wiresMemorySize + objMemorySize + sizeof(int32_t) * 3;
@@ -992,9 +994,11 @@ void* SaveWiresMap() {
             ((int*)data)[3] = oCh.objs[oi].rotate;
             data += sizeof(int) * 4;
             for (int wni = 0; wni < oCh.objs[oi].wireNot.size(); wni++) {
-                data[wni/8] = data[wni / 8] | (oCh.objs[oi].wireNot[wni] & 0x1) << (7 - (wni & 0x7));
+                *data = oCh.objs[oi].wireNot[wni];
+                data += sizeof(char);
+                //data[wni/8] = data[wni / 8] | (oCh.objs[oi].wireNot[wni] & 0x1) << (7 - (wni & 0x7));
             }
-            data += (oCh.objs[oi].wireNot.size() - 1) / 8 + 1;
+            //data += oCh.objs[oi].wireNot.size() / 8 + 1;
         }
     }
     return datav;

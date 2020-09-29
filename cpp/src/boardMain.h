@@ -37,5 +37,5 @@ bool pasteSelected();
 void undoAction();
 void reverseUndo();
 
-void LoadWiresMap(void* data);
-void* SaveWiresMap();
+void LoadBoard(void* data);
+void* SaveBoard();

@@ -146,12 +146,12 @@ extern "C"
     //  Save board
 
     EMSCRIPTEN_KEEPALIVE void
-    _loadWires(void* data) {
-        LoadWiresMap(data);
+    _loadBoard(void* data) {
+        LoadBoard(data);
     }
 
     EMSCRIPTEN_KEEPALIVE void*
-    _saveWires() {
-        return SaveWiresMap();
+    _saveBoard() {
+        return SaveBoard();
     }
 }
