@@ -126,12 +126,35 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 	bool changes = false;
 	switch (obj.typeID)
 	{
-	case 0: //And
-		set(b, grupsSet, obj, objt, 2, get(b, grupsGet, obj, objt, 0) && get(b, grupsGet, obj, objt, 1));
+	case 0: //Button
+		if (obj.memory.size() == 0)
+			obj.memory.push_back(0);
+		else if (obj.memory[0] > 0) {
+			obj.memory[0] -= 1;
+			drawObj(obj);
+		}
+		set(b, grupsSet, obj, objt, 0, obj.memory[0]);
+		set(b, grupsSet, obj, objt, 1, obj.memory[0]);
+		set(b, grupsSet, obj, objt, 2, obj.memory[0]);
+		set(b, grupsSet, obj, objt, 3, obj.memory[0]);
 		return;
-	case 1: //Or
-		set(b, grupsSet, obj, objt, 2, get(b, grupsGet, obj, objt, 0) || get(b, grupsGet, obj, objt, 1));
+	case 1: //1 Bit
+	{
+		if (obj.memory.size() == 0)
+		{
+			obj.memory.push_back(0);
+			obj.memory.push_back(0);
+		}
+		int clk = get(b, grupsGet, obj, objt, 2);
+		if (!obj.memory[1] && clk)
+		{
+			obj.memory[0] = get(b, grupsGet, obj, objt, 1);
+		}
+		obj.memory[1] = clk;
+		if (get(b, grupsGet, obj, objt, 3))
+			set(b, grupsSet, obj, objt, 0, obj.memory[0]);
 		return;
+	}
 	case 2: //XOr
 		set(b, grupsSet, obj, objt, 2, get(b, grupsGet, obj, objt, 0) == get(b, grupsGet, obj, objt, 1));
 		return;
@@ -306,5 +329,18 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 		for (int i = 2; i < obj.typeID - 42; i++)
 			res = res != get(b, grupsGet, obj, objt, i);
 		set(b, grupsSet, obj, objt, obj.typeID - 42, res);
+	}
+	else if (obj.typeID >= 59 && obj.typeID <= 61) // XOr {x}
+	{
+		char number = 0;
+		
+		int size = obj.typeID - 57;
+
+		if (get(b, grupsGet, obj, objt, 0)) number |= 0b0001; 
+		if (get(b, grupsGet, obj, objt, 1)) number |= 0b0010; 
+		if (size >= 3) { if (get(b, grupsGet, obj, objt, 2)) number |= 0b0100; }
+		if (size >= 4) { if (get(b, grupsGet, obj, objt, 3)) number |= 0b1000; }
+
+		set(b, grupsSet, obj, objt, size + number, true);
 	}
 }

@@ -39,7 +39,7 @@ function RefreshGUI() {
         leftMenu.appendChild(file);
         if (file.offsetHeight > 250) {
             file.style.overflowY = "auto";
-            file.theRealH = "70px";
+            file.theRealH = "130px";
             file.style.maxHeight = file.theRealH;
         } else {
             file.theRealH = file.offsetHeight + "px";
@@ -125,8 +125,8 @@ function keyPressEv(e) {
     }
     keyRepeatCount++;
 
-    if (e.key == "r" || e.key == "R") objModelIndex = Math.min(objModelIndex + 1, 16)
-    else if (e.key == "f" || e.key == "F") objModelIndex = Math.max(objModelIndex - 1, 2);
+    if (e.key == "r" || e.key == "R") increesObjModelIndex(); 
+    else if (e.key == "f" || e.key == "F") decreesObjModelIndex();
 
     if (!keyRepeat) {
         if (e.key == "1") selectPalet(0);
@@ -198,7 +198,7 @@ function stepButtonOnClick() {
         board.initRun();
         board.state = "pause";
         updateButtonsPlayStop();
-        selectPalet(1);
+        selectPalet(2);
     } else {
         board.runStep(true);
     }

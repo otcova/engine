@@ -246,11 +246,11 @@ let runSpeed = 2;
 let sliderRunSpeed = document.getElementById("runSpeed");
 var sliderRunSpeedText = document.getElementById("runSpeedText");
 sliderRunSpeed.oninput = function () {
-    runSpeed = Math.round(this.value * this.value * this.value * this.value);
+    runSpeed = Math.round(this.value * this.value * this.value);
     if (runSpeed === 0) sliderRunSpeedText.innerHTML = "speed snail";
     else if (runSpeed === 1) sliderRunSpeedText.innerHTML = "speed turtle";
     else if (runSpeed < 60) sliderRunSpeedText.innerHTML = "speed slow";
-    else if (runSpeed < 6560) sliderRunSpeedText.innerHTML = "speed fast";
+    else if (runSpeed < 999) sliderRunSpeedText.innerHTML = "speed fast";
     else sliderRunSpeedText.innerHTML = "speed max";
 }
 
@@ -258,8 +258,6 @@ Module.onRuntimeInitialized = function () {
 
     new Board("default");
     dispatchEvent(new Event("init-env"));
-
-
 
     resizeCanvas();
     updateButtonsPlayStop();

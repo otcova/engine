@@ -1,10 +1,10 @@
 let objModelIndex = 2;
 let leftMenuData = [
-    ["Input", ["Switch", "Clock"]],
+    ["Input", ["Switch", "Button", "Clock"]],
     ["Output", ["Led", "Display", "Color Led"]],
-    ["Logic", ["And", "Or", "XOr", "Not"]],
+    ["Logic", ["And", "Or", "XOr", "Not", "Decoder"]],
     ["Maths", ["Half adder", "Full adder"]],
-    ["Memory", ["D flip-flop", "Gated RS latch", "RS latch"]]
+    ["Memory", ["1 Bit", "D flip-flop", "Gated RS latch", "RS latch"]]
 ];
 
 let objNames = new Map();
@@ -13,21 +13,33 @@ let objTypes = [];
 function getObjByName(name) {
     let obj = objNames.get(name);
     if (obj != undefined) return obj;
-    return objNames.get(name + objModelIndex);
+    if (name != "Decoder") return objNames.get(name + objModelIndex);
+    return objNames.get(name + Math.min(objModelIndex, 4));
 }
 
-objNames.set("AndDeprecated", objTypes.length); // 0
+function increesObjModelIndex() {
+    if (paletItems[paletIndex] == "Decoder") objModelIndex = Math.min(objModelIndex + 1, 4);
+    else objModelIndex = Math.min(objModelIndex + 1, 16);
+}
+
+function decreesObjModelIndex() {
+    objModelIndex = Math.max(objModelIndex - 1, 2);
+    if (paletItems[paletIndex] == "Decoder") objModelIndex = Math.min(objModelIndex, 4);
+}
+
+
+objNames.set("Button", objTypes.length); // 0
 objTypes.push({
-    name: "AndDeprecated", w: 1, h: 1,
-    wires: [{ dir: "left", pos: 0 }, { dir: "left", pos: 1 }, { dir: "right", pos: 0 }],
-    text: [{ txt: "&", x: 0.5, y: 0.5 }]
+    name: "Button", w: 0, h: 0,
+    wires: [{ dir: "right", pos: 0, hide: true }, { dir: "left", pos: 0, hide: true }, { dir: "down", pos: 0, hide: true }, { dir: "up", pos: 0, hide: true }],
+    leds: [{ txt: true, on: "─", off: "O", undef: "O", x: 0, y: 0 }]
 });
 
-objNames.set("OrDeprecated", objTypes.length); // 1
+objNames.set("1 Bit", objTypes.length);// 1
 objTypes.push({
-    name: "OrDeprecated", w: 1, h: 1,
-    wires: [{ dir: "left", pos: 0 }, { dir: "left", pos: 1 }, { dir: "right", pos: 0 }],
-    text: [{ txt: "≥1", x: 0.5, y: 0.5 }]
+    name: "1 Bit", w: 1, h: 2,
+    wires: [{ dir: "right", pos: 0, txt: "Q" }, { dir: "left", pos: 0, txt: "D" }, { dir: "left", pos: 1, txt: "S" }, { dir: "left", pos: 2, txt: "G" }],
+    text: [{ txt: "1b", x: 0.5, y: 1 }]
 });
 
 objNames.set("XOrDeprecated", objTypes.length); // 2
@@ -139,3 +151,19 @@ for (let i = 2; i <= 16; i++)
     logic_generator("Or", "≥1", i);
 for (let i = 2; i <= 16; i++)
     logic_generator("XOr", "=1", i);
+
+for (let size = 2; size <= 4; size++) { // Decoder
+    let name = "Decoder" + size;
+    objNames.set(name, objTypes.length);
+    let comp = {
+        name: name, w: 2, h: Math.pow(2, size) -1,
+        wires: [],
+        text: [{ txt: "DCODE", x: 1, y: 0 }]
+    };
+    comp.text[0].y = comp.h / 2;
+    for (let i = 0; i < size; i++)
+        comp.wires.push({ dir: "left", pos: i + Math.floor(comp.h / 2) });
+    for (let i = 0; i <= comp.h; i++)
+        comp.wires.push({ dir: "right", pos: i });
+    objTypes.push(comp);
+}

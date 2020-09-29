@@ -386,9 +386,14 @@ bool clickEvent(int boardID, int x, int y)
 {
     Obj* obj = board.getObjAt(x, y);
     if (obj != nullptr) {
-        if (obj->typeID == 4) {
+        if (obj->typeID == 4) { // Switch input
             if (obj->memory.size() == 0) obj->memory.push_back(1);
             else obj->memory[0] = 1-obj->memory[0];
+            drawObj(*obj);
+            return true;
+        } else if (obj->typeID == 0) { // Button input
+            if (obj->memory.size() == 0) obj->memory.push_back(3);
+            else obj->memory[0] = 3-obj->memory[0];
             drawObj(*obj);
             return true;
         }

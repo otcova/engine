@@ -81,6 +81,7 @@ function refreshCanvasTemp() {
         if (paletItems[paletIndex] == "Wire" || paletItems[paletIndex] == "Eraser") {
             let ctx;
             if (paletItems[paletIndex] == "Wire") {
+                if (board.state == "play" || board.state == "pause") return;
                 ctx = canvas.ctxb;
                 ctx.strokeStyle = '#3E3';
                 if (canvas.wireDir == "h") {

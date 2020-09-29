@@ -319,11 +319,11 @@ function drawObj(x, y, rotate, objID, ctx, red, ledPowerPtr, cNotsPtr, selected)
     }
 
     ctx.font = board.scale * 0.5 + "px Arial";
-
     if (obj.leds != undefined) {
         let i = 0;
         for (const led of obj.leds) {
             if (led.txt) {
+                
                 let tx = led.x;
                 let ty = led.y;
                 if (rotate == 1) {
@@ -341,9 +341,8 @@ function drawObj(x, y, rotate, objID, ctx, red, ledPowerPtr, cNotsPtr, selected)
                 let text = led.undef;
                 if (ledPowerPtr != undefined) {
                     let ledColor = Module.HEAP8[ledPowerPtr + i];
-
-                    if (ledColor == true) text = led.on;
-                    else text = led.off;
+                    if (ledColor == 0) text = led.off;
+                    else text = led.on;
                 }
                 drawText(ctx, text, x + tx, y + ty + 0.05);
             } else {

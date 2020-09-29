@@ -1,0 +1,33 @@
+
+/*
+
+
+Data Registers (16):
+    d0: CoinPos
+    d1: Snake Direction
+    d2: Snake tail Length
+
+Ram (256):
+    m0: Snake Head
+    m1...: Snake tail
+
+*/
+
+
+    set d1 1
+
+    set ra m0
+    set rb d0
+    neq-jmp RETURN
+
+FIND-NEW-COIN-POS:
+    set rb random
+    
+    set d3 d2
+    getram [d3]
+    eq-jmp FIND-NEW-COIN-POS
+    sub d3 1
+    neg-jmp RETURN
+    jmp FIND-NEW-COIN-POS
+
+RETURN:

@@ -215,11 +215,11 @@ canvas {
 }
 
 .item {
-    min-width: 50px;
+    min-width: 57px;
     min-height: 50px;
-    max-width: 50px;
+    max-width: 57px;
     max-height: 50px;
-    margin: 5px;
+    margin: 4px;
 }
 
 .buttonTxt {
