@@ -1,89 +1,180 @@
-
-/*
-
 flags: [negative / carry / greater], equal
 
 0b000000	none
+0b010000	reset // clear all memory (ram, ra, rb, d0, d1, d2, d3 and poiner)
+0b100000	end
+0b110000	pause
 
 ---- MEMORY ----
-0b000001	set n // ra = n
-0b010001	set n // rb = n
-0b100001	set n // d0 = n
-0b110001	set n // d1 = n
+0b000001	clear ra // ra = 0
+0b010001	clear rb // rb = 0
+0b100001	clear d0 // d0 = 0
+0b110001	swap // ra, rb
 
-0b000010	get d0 // ra = d0
-0b010010	get d1 // ra = d1
-0b100010	get d2 // ra = d2
-0b110010	get d3 // ra = d3
+0b000010	set ra // ra = n
+0b010010	set rb // rb = n
+0b100010	store rb // ram[rb] = ra
+0b110010	store d0 // ram[d0] = ra
 
-0b000011	load // ra = ram[ra]
-0b010011	load // rb = ram[ra]
-0b100011	load n // ra = ram[n]
-0b110011	load n // rb = ram[n]
+0b000011	set d0 // d0 = n
+0b010011	set d1 // d1 = n
+0b100011	set d2 // d2 = n
+0b110011	set d3 // d3 = n
 
-0b000100	swap // ra, rb
-0b010100	swap // d0, d1
-0b100100	swap // d1, d2
-0b110100	swap // d2, d3
+0b000100	get d0 // ra = d0
+0b010100	get d1 // ra = d1
+0b100100	get d2 // ra = d2
+0b110100	get d3 // ra = d3
+
+0b000101	move d0 // d0 = ra
+0b010101	move d1 // d1 = ra
+0b100101	move d2 // d2 = ra
+0b110101	move d3 // d3 = ra
+
+0b000110	load ra// ra = ram[ra]
+0b010110	load rb// rb = ram[ra]
+0b100110	load ra d0 // ra = ram[d0]
+0b110110	load rb d0 // rb = ram[d0]
 
 ----- ALU -----
-0b000101	add // ra = ra + rb
-0b010101	sub // ra = ra - rb
-0b100101	mult // ra = ra * rb
-0b110101	div // ra = ra / rb
+0b000111	++ra // incress 1 ra (set flag overflow)
+0b010111	--ra // decress 1 ra (set flag negative)
+0b100111	++d0 // incress 1 d0 (set flag overflow)
+0b110111	--d0 // decress 1 d0 (set flag negative)
 
-0b000110	rand ra // ra = random
-0b010110	rand rb // rb = random
-0b100110	cool floating point
-0b110110	cool floating point
+0b001000	add // ra = ra + rb
+0b011000	sub // ra = ra - rb
+0b101000	mult // ra = ra * rb
+0b111000	div // ra = ra / rb
+
+0b001001	rand // ra = random
+0b011001	and // ra = ra & rb
+0b101001	or // ra = ra | rb
+0b111001	xor // ra = ra ^ rb
 
 ----- IF -----
-0b000111	cmp // compare ra, rb and set flags
-0b010111	jmp n // jump to n
-0b100111	je n // jump if equal flag
-0b110111	jle n // jump if greater flag
+0b001010	cmp // compare ra, rb
+0b011010	set ra flags
+0b101010	jmp // jump to n
+0b111010	cjmp // compare and jump to n
+
+0b001011	je // jump to n if equal flag
+0b011011	jne // jump to n if not equal flag
+0b101011	jg // jump to n if greater flag
+0b111011	jge // jump to n if greater and equal flag
+
+0b001100	cje // compare and jump to n if equal flag
+0b011100	cjne // compare and jump to n if not equal flag
+0b101100	cjg // compare and jump to n if greater flag
+0b111100	cjge // compare and jump to n if greater and equal flag
 
 ---- INPUT ----
-0b001000	in-arrow-up // ra = input
-0b011000	in-arrow-down // ra = input
-0b101000	in-arrow-left // ra = input
-0b111000	in-arrow-right // ra = input
+0b001101	in-arrow-up // set flag equal if input and makes an jne
+0b011101	in-arrow-down // set flag equal if input and makes an jne
+0b101101	in-arrow-left // set flag equal if input and makes an jne
+0b111101	in-arrow-right // set flag equal if input and makes an jne
 
-*/
-
-/*
-
-
-
-
+--- OUTPUT ---
+0b001110	print a // outs ra to display A
+0b011110	print b // outs ra to display B 
+0b101110	led // set ra to point display
+0b111110	frame // clears point display for a new frame
 
 
-Data Registers (4):
-	d0: CoinPos
-	d1: Snake Direction
-	d2: Snake tail Length
-
-Ram (256):
-	m0: Snake Head
-	m1...: Snake tail
-
-*/
 
 
-	set d1 1
 
-	set ra m0
-	set rb d0
-	neq-jmp RETURN
 
-FIND-NEW-COIN-POS:
-	set rb random
+d1 -> TAIL-LEN
+d2 -> SNAKE-DIR
+d3 -> COIN-POS
+
+r0 -> SNAKE HEAD
+rx -> TAIL POS
+
+
+#START:
+	set SNAKE-DIR
+	0b1
 	
-	set d3 d2
-	load [d3]
-	eq-jmp FIND-NEW-COIN-POS
-	sub d3 1
-	neg-jmp RETURN
-	jmp FIND-NEW-COIN-POS
+UPDATE-COIN-POS:
+	rand
+	move COIN-POS
+CHECK-COIN-POS:
+	get TAIL-LEN
+	move d0
+	get COIN-POS
+CHECK-COIN-LOOP:
+	load rb d0
+	cje
+	UPDATE-COIN-POS
+	--d0
+	jg 
+	END-CHECK-COIN
+	jmp 
+	CHECK-COIN-LOOP
+END-CHECK-COIN:
 
-RETURN:
+GAME-LOOP:
+	
+#GET-INPUT:
+	in-arrow-up
+	IN-DOWN
+	set d0
+	0b110111
+IN-DOWN:
+	in-arrow-down
+	IN-LEFT
+	set d0
+	0b110111
+IN-LEFT:
+	in-arrow-left
+	IN-RIGHT
+	set d0
+	0b110111
+IN-RIGHT:
+	in-arrow-right
+	IN-DOWN
+	set d0
+	0b110111
+MOVE-SNAKE:
+	clear d0
+	load rb d0
+	get SNAKE-DIR
+	add
+	store d0
+	
+#DRAW-COIN:
+	get COIN-POS
+	led
+#DRAW-SNAKE:
+	get TAIL-LEN
+	move d0
+DRAW-SNAKE-LOOP:
+	load ra d0
+	led
+	--d0
+	jn 
+	END-CHECK-COIN
+	jmp 
+	DRAW-SNAKE-LOOP
+END-CHECK-COIN:
+
+
+#GET-COIN-SCORE:
+	clear ra
+	load rb
+	get COIN-POS
+	cjne 
+	END-COIN-SCORE
+	get TAIL-LEN
+	++ra
+	move TAIL-LEN
+	jmp
+	UPDATE-COIN-POS
+END-COIN-SCORE:
+
+	jmp 
+	GAME-LOOP
+	
+#END

@@ -171,7 +171,7 @@ for (let size = 2; size <= 6; size++) { // Decoder
 objNames.set("Point Display", objTypes.length);
 let comp = {
     name: "Point Display", w: 9, h: 9,
-    wires: [{ dir: "down", pos: 1, txt: "R" }, { dir: "down", pos: 2, txt: "S" }],
+    wires: [{ dir: "down", pos: 1, txt: "C" }, { dir: "down", pos: 2, txt: "S" }],
     leds: []
 };
 for (let y = 0; y < 8; y++)
