@@ -37,5 +37,7 @@ bool pasteSelected();
 void undoAction();
 void reverseUndo();
 
+void removeEmptyWireChunks();
+
 void LoadBoard(void* data);
 void* SaveBoard();

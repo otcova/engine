@@ -331,7 +331,7 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			res = res != get(b, grupsGet, obj, objt, i);
 		set(b, grupsSet, obj, objt, obj.typeID - 42, res);
 	}
-	else if (obj.typeID >= 59 && obj.typeID <= 63) // XOr {x}
+	else if (obj.typeID >= 59 && obj.typeID <= 63) // Decoder
 	{
 		unsigned char number = 0;
 
@@ -372,6 +372,16 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			if (obj.memory[number] == 0) {
 				obj.memory[number] = 7;
 				drawObj(obj);
+			}
+		}
+	}
+	else if (obj.typeID >= 65 && obj.typeID <= 79) // Dor
+	{
+		int size = obj.typeID - 63;
+		if (get(b, grupsGet, obj, objt, 0)) {
+			for (int i = 0; i < size; i++) {
+				if (get(b, grupsGet, obj, objt, i+1)) 
+					set(b, grupsSet, obj, objt, size + i + 1, true);
 			}
 		}
 	}

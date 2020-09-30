@@ -1,40 +1,89 @@
 
 /*
 
-in-arrow-up
-in-arrow-down
-in-arrow-left
-in-arrow-right
+flags: [negative / carry / greater], equal
+
+0b000000	none
+
+---- MEMORY ----
+0b000001	set n // ra = n
+0b010001	set n // rb = n
+0b100001	set n // d0 = n
+0b110001	set n // d1 = n
+
+0b000010	get d0 // ra = d0
+0b010010	get d1 // ra = d1
+0b100010	get d2 // ra = d2
+0b110010	get d3 // ra = d3
+
+0b000011	load // ra = ram[ra]
+0b010011	load // rb = ram[ra]
+0b100011	load n // ra = ram[n]
+0b110011	load n // rb = ram[n]
+
+0b000100	swap // ra, rb
+0b010100	swap // d0, d1
+0b100100	swap // d1, d2
+0b110100	swap // d2, d3
+
+----- ALU -----
+0b000101	add // ra = ra + rb
+0b010101	sub // ra = ra - rb
+0b100101	mult // ra = ra * rb
+0b110101	div // ra = ra / rb
+
+0b000110	rand ra // ra = random
+0b010110	rand rb // rb = random
+0b100110	cool floating point
+0b110110	cool floating point
+
+----- IF -----
+0b000111	cmp // compare ra, rb and set flags
+0b010111	jmp n // jump to n
+0b100111	je n // jump if equal flag
+0b110111	jle n // jump if greater flag
+
+---- INPUT ----
+0b001000	in-arrow-up // ra = input
+0b011000	in-arrow-down // ra = input
+0b101000	in-arrow-left // ra = input
+0b111000	in-arrow-right // ra = input
+
+*/
+
+/*
 
 
 
 
-Data Registers (16):
-    d0: CoinPos
-    d1: Snake Direction
-    d2: Snake tail Length
+
+
+Data Registers (4):
+	d0: CoinPos
+	d1: Snake Direction
+	d2: Snake tail Length
 
 Ram (256):
-    m0: Snake Head
-    m1...: Snake tail
+	m0: Snake Head
+	m1...: Snake tail
 
 */
 
 
-    set d1 1
+	set d1 1
 
-    set ra m0
-    set rb d0
-    neq-jmp RETURN
+	set ra m0
+	set rb d0
+	neq-jmp RETURN
 
 FIND-NEW-COIN-POS:
-    set rb random
-    
-    set d3 d2
-    getram [d3]
-    eq-jmp FIND-NEW-COIN-POS
-    sub d3 1
-    neg-jmp RETURN
-    jmp FIND-NEW-COIN-POS
+	set rb random
+	
+	set d3 d2
+	load [d3]
+	eq-jmp FIND-NEW-COIN-POS
+	sub d3 1
+	neg-jmp RETURN
+	jmp FIND-NEW-COIN-POS
 
 RETURN:

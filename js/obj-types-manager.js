@@ -2,7 +2,7 @@ let objModelIndex = 2;
 let leftMenuData = [
     ["Input", ["Switch", "Button", "Clock"]],
     ["Output", ["Led", "Display", "Color Led", "Point Display"]],
-    ["Logic", ["And", "Or", "XOr", "Not", "Decoder"]],
+    ["Logic", ["And", "Or", "XOr", "Not", "Decoder", "Dor"]],
     ["Maths", ["Half adder", "Full adder"]],
     ["Memory", ["1 Bit", "D flip-flop", "Gated RS latch", "RS latch"]]
 ];
@@ -180,3 +180,19 @@ for (let y = 0; y < 8; y++)
 for (let i = 0; i < 6; i++)
     comp.wires.push({ dir: "down", pos: 3 + i, txt: 1 << i });
 objTypes.push(comp);
+
+for (let size = 2; size <= 16; size++) { // Decoder
+    let name = "Dor" + size;
+    objNames.set(name, objTypes.length);
+    let comp = {
+        name: name, w: 1, h: size - 1,
+        wires: [{ dir: "down", pos: 0, txt: "&" }],
+        text: [{ txt: "", x: 1, y: 0 }]
+    };
+    comp.text[0].y = comp.h / 2;
+    for (let i = 0; i < size; i++)
+        comp.wires.push({ dir: "left", pos: i });
+    for (let i = 0; i <= comp.h; i++)
+        comp.wires.push({ dir: "right", pos: i });
+    objTypes.push(comp);
+}

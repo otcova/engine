@@ -59,6 +59,10 @@ struct WireChunk
         }
     }
 
+    inline bool is_empty() const {
+        return wiresActive.none();
+    }
+    
     inline std::bitset<WireChunkSize * WireChunkSize * 2>::reference local(int x, int y, int d) { return wiresActive[x * 2 * WireChunkSize + y * 2 + d]; }
     inline std::bitset<WireChunkSize * WireChunkSize * 2>::reference global(int x, int y, int d) { return wiresActive[mod(x, WireChunkSize) * 2 * WireChunkSize + mod(y, WireChunkSize) * 2 + d]; }
     inline std::bitset<WireChunkSize * WireChunkSize>::reference localNode(int x, int y) { return wiresNode[x * WireChunkSize + y]; }

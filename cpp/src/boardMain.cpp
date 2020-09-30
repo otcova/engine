@@ -493,6 +493,7 @@ void propagateGrup(int x, int y, int d, bool first) {
 
 void initRun(int boardID)
 {
+    removeEmptyWireChunks();
     grups.clear();
 
     std::vector<std::map<int64_t, WireChunk>::iterator> blanckChunks;
@@ -903,15 +904,13 @@ void reverseUndo() {
     }
 }
 
-
-/*
-void myCopy(const char* srcS, const char* srcB, char* dts) {
-    while (srcS != srcB) {
-        *dts = *srcS;
-        ++dts; ++srcS;
+void removeEmptyWireChunks() {
+    for (auto it = board.wiresMap.cbegin(); it != board.wiresMap.cend();) {
+        if (it->second.is_empty()) {
+            board.wiresMap.erase(it++);
+        } else ++it;
     }
-}*/
-
+}
 
 void LoadBoard(void* datav) {
     char* data = (char*)datav;
@@ -956,6 +955,8 @@ void LoadBoard(void* datav) {
 }
 
 void* SaveBoard() {
+    removeEmptyWireChunks();
+
     int32_t wiresMemorySize = board.wiresMap.size() * sizeof(std::pair<int64_t, StoreWireChunk>);
     int32_t objMemorySize = board.objsMap.size() * (sizeof(int) + sizeof(int64_t));
     for (const auto& [chPos, oCh] : board.objsMap) {
