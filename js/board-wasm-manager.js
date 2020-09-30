@@ -66,13 +66,13 @@ class Board {
         Module.__setWire(this.boardID, false, pa.x, pa.y, pb.x, pb.y, pc.x, pc.y);
     }
 
-    addObj(p, objName) {
+    addObj(p, objType) {
         this.stopRun();
-        Module.__addObj(this.boardID, p.x, p.y, objName, objTypes[objName].rotate);
+        Module.__addObj(this.boardID, p.x, p.y, objType, objTypes[objType].rotate);
     }
 
     canAddObj(objType, p) {
-        return Module.__canAddObj(this.boardID, p.x, p.y, objType, objType.rotate);
+        return Module.__canAddObj(this.boardID, p.x, p.y, objType, objTypes[objType].rotate);
     }
 
     removeObj(p) {
