@@ -92,8 +92,8 @@ extern "C"
     }
 
     EMSCRIPTEN_KEEPALIVE void
-    _moveSelected(int dx, int dy) {
-        moveSelected(dx, dy);
+    _moveSelected(int x, int y) {
+        moveSelected(x, y);
     }
 
     EMSCRIPTEN_KEEPALIVE void

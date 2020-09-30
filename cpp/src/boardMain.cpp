@@ -644,10 +644,12 @@ void deleteSelected()
     selectedObjs.clear();
 }
 
-void moveSelected(int dx, int dy)
+void moveSelected(int x, int y)
 {
-    selectedX += dx;
-    selectedY += dy;
+    int dx = x - selectedX;
+    int dy = y - selectedY;
+    selectedX = x;
+    selectedY = y;
 
     for (int i = 0; i < selectedObjs.size(); i++) {
         selectedObjs[i].x += dx;

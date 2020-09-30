@@ -24,7 +24,7 @@ void stopRun(int boardID);
 bool clickEvent(int boardID, int x, int y);
 
 bool selectRect(int rectX, int rectY, int rectW, int rectH);
-void moveSelected(int dx, int dy);
+void moveSelected(int x, int y);
 void rotateSelected(int r);
 void deleteSelected();
 void unSelect();

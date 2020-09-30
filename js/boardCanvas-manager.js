@@ -71,10 +71,12 @@ function refreshCanvasObj() {
 function refreshCanvasTemp() {
     refreshCanvasBackground();
     canvas.ctxt.clearRect(0, 0, canvas.temp.width, canvas.temp.height);
-
     if (select) {
-        if (canvas.wireTemp != undefined)
-            if (canvas.wireTemp.length > 2) board.moveSelected(canvas.wireTemp[1].x - canvas.wireTemp[2].x, canvas.wireTemp[1].y - canvas.wireTemp[2].y);
+        if (canvas.wireTemp != undefined) {
+            if (canvas.wireTemp.length > 2)  {
+                board.moveSelected(canvas.wireTemp[1].x, canvas.wireTemp[1].y);//canvas.wireTemp[1].x - canvas.wireTemp[2].x, canvas.wireTemp[1].y - canvas.wireTemp[2].y);
+            }
+        }
         board.drawSelect();
     }
     else if (canvas.wireTemp != undefined) {
