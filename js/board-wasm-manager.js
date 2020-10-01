@@ -54,7 +54,7 @@ class Board {
     }
 
     swapObjNot(p, d) {
-        return Module.__swapObjNot(this.boardID, p.x, p.y, d);
+        return Module.__swapObjNot(p.x, p.y, d);
     }
 
     clickEvent(p) {
