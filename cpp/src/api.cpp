@@ -44,7 +44,7 @@ extern "C"
 
     EMSCRIPTEN_KEEPALIVE void
     _swapNode(int boardID, int x, int y) {
-        swapNode(boardID, x, y);
+        client_swapNode(x, y);
     }
 
     EMSCRIPTEN_KEEPALIVE void 
@@ -92,8 +92,8 @@ extern "C"
     }
 
     EMSCRIPTEN_KEEPALIVE void
-    _moveSelected(int x, int y) {
-        moveSelected(x, y);
+    _moveSelected(int dx, int dy) {
+        moveSelected(dx, dy);
     }
 
     EMSCRIPTEN_KEEPALIVE void

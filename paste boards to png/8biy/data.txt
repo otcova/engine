@@ -1,4 +1,6 @@
-flags: [negative / carry / greater], equal
+
+flags: overflow, equal
+
 
 0b000000	none
 0b010000	reset // clear all memory (ram, ra, rb, d0, d1, d2, d3 and poiner)
@@ -54,19 +56,19 @@ flags: [negative / carry / greater], equal
 
 ----- IF -----
 0b001010	cmp // compare ra, rb
-0b011010	set ra flags
-0b101010	jmp // jump to n
-0b111010	cjmp // compare and jump to n
+0b011010	jmp // jump to n
+0b101010	get arrows-flags // ra = arrows-flags
+0b111010	get arrows-pos rb // rb = arrows-pos
 
-0b001011	je // jump to n if equal flag
-0b011011	jne // jump to n if not equal flag
-0b101011	jg // jump to n if greater flag
-0b111011	jge // jump to n if greater and equal flag
+0b001011	jnf // jump if no flag
+0b011011	je // jump if equal flag
+0b101011	jo // jump if overflow flag
+0b111011	jeo // jump to n if overflow or equal
 
-0b001100	cje // compare and jump to n if equal flag
-0b011100	cjne // compare and jump to n if not equal flag
-0b101100	cjg // compare and jump to n if greater flag
-0b111100	cjge // compare and jump to n if greater and equal flag
+0b001100	cjnf // comp and jump if no flag
+0b011100	cje // comp and jump if equal flag
+0b101100	cjo // comp and jump if overflow flag
+0b111100	cjeo // comp and jump to n if overflow or equal
 
 ---- INPUT ----
 0b001101	in-arrow-up // set flag equal if input and makes an jne
@@ -75,9 +77,9 @@ flags: [negative / carry / greater], equal
 0b111101	in-arrow-right // set flag equal if input and makes an jne
 
 --- OUTPUT ---
-0b001110	print a // outs ra to display A
-0b011110	print b // outs ra to display B 
-0b101110	led // set ra to point display
+0b001110	print // outs ra to display A
+0b011110	led ra // set ra to point display
+0b101110	led rb // set rb to point display
 0b111110	frame // clears point display for a new frame
 
 
@@ -100,12 +102,19 @@ rx -> TAIL POS
 UPDATE-COIN-POS:
 	rand
 	move COIN-POS
+GAME-LOOP:
 CHECK-COIN-POS:
 	get TAIL-LEN
 	move d0
 	get COIN-POS
+	swap
+	led ra
 CHECK-COIN-LOOP:
-	load rb d0
+	load d0
+	led ra
+	++d0
+	store d0
+	--d0
 	cje
 	UPDATE-COIN-POS
 	--d0
@@ -114,52 +123,24 @@ CHECK-COIN-LOOP:
 	jmp 
 	CHECK-COIN-LOOP
 END-CHECK-COIN:
-
-GAME-LOOP:
+	frame
 	
 #GET-INPUT:
-	in-arrow-up
-	IN-DOWN
-	set d0
-	0b110111
-IN-DOWN:
-	in-arrow-down
-	IN-LEFT
-	set d0
-	0b110111
-IN-LEFT:
-	in-arrow-left
-	IN-RIGHT
-	set d0
-	0b110111
-IN-RIGHT:
-	in-arrow-right
-	IN-DOWN
-	set d0
-	0b110111
+	get SNAKE-DIR
+	set rb
+	0b100000
+	xor
+	get arrow-pod rb
+	cje
+	MOVE-SNAKE
+	swap
+	move SNAKE-DIR
 MOVE-SNAKE:
 	clear d0
 	load rb d0
 	get SNAKE-DIR
 	add
 	store d0
-	
-#DRAW-COIN:
-	get COIN-POS
-	led
-#DRAW-SNAKE:
-	get TAIL-LEN
-	move d0
-DRAW-SNAKE-LOOP:
-	load ra d0
-	led
-	--d0
-	jn 
-	END-CHECK-COIN
-	jmp 
-	DRAW-SNAKE-LOOP
-END-CHECK-COIN:
-
 
 #GET-COIN-SCORE:
 	clear ra

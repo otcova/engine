@@ -229,10 +229,8 @@ void setWire(int boardID, bool set, int ax, int ay, int bx, int by, int cx, int 
     pushActionGrup(actionGrup);
 }
 
-void swapNode(int boardID, int x, int y, bool makeUndo) 
+void swapNode(int x, int y, std::vector<Action> actionGrup) 
 {
-    std::vector<Action> actionGrup;
-
     int count = 0;
     if (board.getWire(x, y, 0)) count++;
     if (board.getWire(x, y, 1)) count++;
@@ -258,8 +256,12 @@ void swapNode(int boardID, int x, int y, bool makeUndo)
         board.getWireNode(x, y) = !board.getWireNode(x, y);
         actionGrup.emplace_back(x, y);
     }
+}
 
-    if (makeUndo) pushActionGrup(actionGrup);
+void client_swapNode(int x, int y) {
+    std::vector<Action> actionGrup;
+    swapNode(x, y, actionGrup);
+    pushActionGrup(actionGrup);
 }
 
 void drawWires(int boardID, double scale, double rectX, double rectY, double rectW, double rectH)
@@ -366,7 +368,7 @@ bool canAddObj(int boardID, int x, int y, int typeID, int rotate)
     return !objWiresCollision(thisObj);
 }
 
-bool swapObjNot(int boardID, int x, int y, int d, bool makeUndo) {
+bool swapObjNot(int x, int y, int d, bool makeUndo) {
     Pos chPos = board.getObjChunkCoords(x, y);
     for (int cy = chPos.y - 1; cy <= chPos.y+1; ++cy)
     for (int cx = chPos.x - 1; cx <= chPos.x+1; ++cx) {
@@ -628,6 +630,10 @@ bool selectRect(int rectX, int rectY, int rectW, int rectH)
         }
     }
 
+    for (const auto& node : selectedNodes) {
+        changeNode(node.x, node.y);
+    }
+    
     if (selectedObjs.size() != 0 || selectedWires.size() != 0 || selectedNodes.size() != 0) {
         actionGrup.emplace_back(Action::Type::Select);
         pushActionGrup(actionGrup);
@@ -644,12 +650,10 @@ void deleteSelected()
     selectedObjs.clear();
 }
 
-void moveSelected(int x, int y)
+void moveSelected(int dx, int dy)
 {
-    int dx = x - selectedX;
-    int dy = y - selectedY;
-    selectedX = x;
-    selectedY = y;
+    selectedX += dx;
+    selectedY += dy;
 
     for (int i = 0; i < selectedObjs.size(); i++) {
         selectedObjs[i].x += dx;
@@ -752,13 +756,16 @@ void unSelect()
 
             for (const auto& node : selectedNodes) {
                 auto wireNode = board.getWireNode(node.x, node.y);
-                swapNode(0, node.x, node.y, false);
-                if (wireNode != board.getWireNode(node.x, node.y))
-                    actionsRegister[actionsRegister.size() - 1].emplace_back(node.x, node.y);
+                if (!wireNode) {
+                    swapNode(node.x, node.y, {});
+                    if (wireNode != board.getWireNode(node.x, node.y))
+                        actionsRegister[actionsRegister.size() - 1].emplace_back(node.x, node.y);
+                }
             }
 
             for (const auto& w : selectedWires) {
                 changeNode(w.x, w.y);
+                changeNode(w.x + 1-w.d, w.y + w.d);
             }
 
             deleteSelected();
@@ -863,7 +870,7 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
             }
             else if (actionGrup[i].type == Action::Type::SwapNode) {
                 nodes.emplace_back(actionGrup[i].x, actionGrup[i].y);
-                swapNode(0, actionGrup[i].x, actionGrup[i].y, false);
+                swapNode(actionGrup[i].x, actionGrup[i].y, {});
             }
             else if (actionGrup[i].type == Action::Type::SetObj) {
                 if (actionGrup[i].set == addReverse) {
@@ -878,7 +885,7 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
                 }
             }
             else if (actionGrup[i].type == Action::Type::SwapObjNot) {
-                swapObjNot(0, actionGrup[i].x, actionGrup[i].y, actionGrup[i].d, false);
+                swapObjNot(actionGrup[i].x, actionGrup[i].y, actionGrup[i].d, false);
             }
             else if (actionGrup[i].type == Action::Type::Select) {
                 deleteSelected();

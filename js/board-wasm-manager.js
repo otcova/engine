@@ -114,8 +114,8 @@ class Board {
         return false;
     }
 
-    moveSelected(dx, dy) {
-        Module.__moveSelected(dx, dy);
+    moveSelected(x, y) {
+        Module.__moveSelected(x, y, 0, 0);
     }
 
     rotateSelection(r) {

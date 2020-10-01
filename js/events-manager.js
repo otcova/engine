@@ -5,6 +5,9 @@ addEventListener("init-env", () => {
             canvas.wireTemp = [getMousePos(), getMousePos()];
             canvas.wireDir = "h";
             refreshCanvasTemp();
+            
+            // move Select mouse down
+            canvas.movSel = canvas.wireTemp[0];
         }
     });
 
@@ -85,7 +88,6 @@ addEventListener("init-env", () => {
                         y0 = y1;
                         y1 = t;
                     }
-
                     select = board.selectRect(x0, y0, x1 - x0, y1 - y0);
                     canvas.wireTemp = undefined;
                     refreshAllCanvas();
