@@ -141,19 +141,21 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 		return;
 	case 1: //1 Bit
 	{
-		if (obj.memory.size() == 0)
+		if (obj.memory.size() == 0)  {
 			obj.memory.push_back(0);
-			
-		if (get(b, grupsGet, obj, objt, 4))
-		{
+			obj.memory.push_back(0);
+		}
+		auto s = get(b, grupsGet, obj, objt, 3);	
+		if (get(b, grupsGet, obj, objt, 4)) {
 			obj.memory[0] = 0;
 		}
 		else if (get(b, grupsGet, obj, objt, 1))
 		{
-			if (get(b, grupsGet, obj, objt, 3))
+			if (s && !obj.memory[1])
 				obj.memory[0] = get(b, grupsGet, obj, objt, 2);
 			set(b, grupsSet, obj, objt, 0, obj.memory[0]);
 		}
+		obj.memory[1] = s;
 		return;
 	}
 	case 2: //XOr
@@ -252,7 +254,7 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			obj.memory.push_back(0);
 		else if (++obj.memory[0] >= 16 * 2)
 			obj.memory[0] = 0;
-		set(b, grupsSet, obj, objt, 0, obj.memory[0] < 16);
+		set(b, grupsSet, obj, objt, 0, obj.memory[0] >= 16);
 		return;
 	case 9: // Half adder
 	{
@@ -378,10 +380,11 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 	else if (obj.typeID >= 65 && obj.typeID <= 127) // Dor
 	{
 		int size = obj.typeID - 63;
-		if (get(b, grupsGet, obj, objt, 0)) {
+		if (get(b, grupsGet, obj, objt, 0) || get(b, grupsGet, obj, objt, 1)) {
 			for (int i = 0; i < size; i++) {
-				if (get(b, grupsGet, obj, objt, i+1)) 
-					set(b, grupsSet, obj, objt, size + i + 1, true);
+				if (get(b, grupsGet, obj, objt, i+2)) {
+					set(b, grupsSet, obj, objt, size + i + 2, true);
+				}
 			}
 		}
 	}

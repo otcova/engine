@@ -217,14 +217,14 @@ for (let size = 2; size <= 64; size++) { // Door
     objNames.set(name + size, objTypes.length);
     let comp = {
         name, w: 2, h: size - 1,
-        wires: [{ dir: "down", pos: 1, txt: "&" }],
+        wires: [{ dir: "down", pos: 1, txt: "&" }, { dir: "up", pos: 1, txt: "&" }],
         text: [{ txt: "DOOR", x: 1, y: 0 }]
     };
     comp.text[0].y = comp.h / 2;
     for (let i = 0; i < size; i++)
         comp.wires.push({ dir: "left", pos: i });
     for (let i = 0; i <= comp.h; i++)
-        comp.wires.push({ dir: "right", pos: i });
+        comp.wires.push({ dir: "right", pos: i, txt: "" + i });
     objTypes.push(comp);
 }
 

@@ -1008,9 +1008,10 @@ void LoadBoard(void* datav) {
         for (int i = 0; i < objsLen; i++) {
             int typeID = ((int*)data)[2];
             pair.second.objs.emplace_back(((int*)data)[0], ((int*)data)[1], typeID, ((int*)data)[3]);
-            int longMemoryLen = ((int*)data)[4];
-            data += sizeof(int) * 5;
-            for (int wni = 0; wni < pair.second.objs[i].wireNot.size(); wni++) {
+            int wireNotLen = ((int*)data)[4];
+            int longMemoryLen = ((int*)data)[5];
+            data += sizeof(int) * 6;
+            for (int wni = 0; wni < wireNotLen; wni++) {
                 pair.second.objs[i].wireNot[wni] = *data;
                 data += sizeof(char);
             }
@@ -1031,7 +1032,7 @@ void* SaveBoard() {
     int32_t wiresMemorySize = board.wiresMap.size() * sizeof(std::pair<int64_t, StoreWireChunk>);
     int32_t objMemorySize = board.objsMap.size() * (sizeof(int) + sizeof(int64_t));
     for (const auto& [chPos, oCh] : board.objsMap) {
-        objMemorySize += oCh.objs.size() * 5 * sizeof(int);
+        objMemorySize += oCh.objs.size() * 6 * sizeof(int);
         for (int oi = 0; oi < oCh.objs.size(); oi++) {
             objMemorySize += oCh.objs[oi].wireNot.size() * sizeof(char);
             objMemorySize += oCh.objs[oi].longMemory.size() * sizeof(char);
@@ -1065,8 +1066,9 @@ void* SaveBoard() {
             ((int*)data)[1] = oCh.objs[oi].y;
             ((int*)data)[2] = oCh.objs[oi].typeID;
             ((int*)data)[3] = oCh.objs[oi].rotate;
-            ((int*)data)[4] = oCh.objs[oi].longMemory.size();
-            data += sizeof(int) * 5;
+            ((int*)data)[4] = oCh.objs[oi].wireNot.size();
+            ((int*)data)[5] = oCh.objs[oi].longMemory.size();
+            data += sizeof(int) * 6;
             for (int wni = 0; wni < oCh.objs[oi].wireNot.size(); wni++) {
                 *data = oCh.objs[oi].wireNot[wni];
                 data += sizeof(char);
