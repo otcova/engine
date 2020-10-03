@@ -1,4 +1,5 @@
 let objModelIndex = 2;
+
 let leftMenuData = [
     ["Input", ["Switch", "Button", "Number", "Clock"]],
     ["Output", ["Led", "Display", "Color Led", "Point Display"]],
@@ -10,21 +11,52 @@ let leftMenuData = [
 let objNames = new Map();
 let objTypes = [];
 
+let complexComps = new Map();
+complexComps.set("And", { rotate: 0, insLen: 2, insLenMin: 2, insLenMax: 16 });
+complexComps.set("Or", { rotate: 0, insLen: 2, insLenMin: 2, insLenMax: 16 });
+complexComps.set("XOr", { rotate: 0, insLen: 2, insLenMin: 2, insLenMax: 16 });
+complexComps.set("Number", { rotate: 3, insLen: 2, insLenMin: 2, insLenMax: 16 });
+complexComps.set("Door", { rotate: 0, insLen: 2, insLenMin: 2, insLenMax: 64 });
+complexComps.set("Decoder", { rotate: 0, insLen: 2, insLenMin: 2, insLenMax: 6 });
+
 function getObjByName(name) {
     let obj = objNames.get(name);
     if (obj != undefined) return obj;
-    if (name != "Decoder") return objNames.get(name + objModelIndex);
-    return objNames.get(name + Math.min(objModelIndex, 6));
+    let xcomp = complexComps.get(name);
+    if (xcomp != undefined) {
+        return objNames.get(name + xcomp.insLen);
+    }
 }
 
 function increesObjModelIndex() {
-    if (paletItems[paletIndex] == "Decoder") objModelIndex = Math.min(objModelIndex + 1, 6);
-    else objModelIndex = Math.min(objModelIndex + 1, 16);
+    let xcomp = complexComps.get(paletItems[paletIndex]);
+    if (xcomp != undefined)
+    xcomp.insLen = Math.min(xcomp.insLen+1, xcomp.insLenMax);
 }
 
 function decreesObjModelIndex() {
-    objModelIndex = Math.max(objModelIndex - 1, 2);
-    if (paletItems[paletIndex] == "Decoder") objModelIndex = Math.min(objModelIndex, 6);
+    let xcomp = complexComps.get(paletItems[paletIndex]);
+    if (xcomp != undefined)
+        xcomp.insLen = Math.max(xcomp.insLen-1, xcomp.insLenMin);
+}
+
+function getRotateOfObj(name) {
+    let obj = objNames.get(name);
+    if (obj == undefined) {
+        let xcomp = complexComps.get(name);
+        return xcomp.rotate;
+    }
+    return obj.rotate;
+}
+
+function setRotateOfObj(name, r) {
+    let xcomp = complexComps.get(name);
+    if (xcomp == undefined) {
+        let obj = objNames.get(name);
+        obj.rotate = r;
+    } else {
+        xcomp.rotate = r;
+    }
 }
 
 
@@ -132,8 +164,7 @@ objTypes.push({
 // extra
 
 function logic_generator(name, sign, size) {
-    name += `${size}`
-    objNames.set(name, objTypes.length);
+    objNames.set(name + size, objTypes.length);
     let comp = {
         name: name, w: 1, h: size - 1,
         wires: [],
@@ -153,10 +184,10 @@ for (let i = 2; i <= 16; i++)
     logic_generator("XOr", "=1", i);
 
 for (let size = 2; size <= 6; size++) { // Decoder
-    let name = "Decoder" + size;
-    objNames.set(name, objTypes.length);
+    let name = "Decoder";
+    objNames.set(name + size, objTypes.length);
     let comp = {
-        name: name, w: 2, h: Math.pow(2, size) - 1,
+        name, w: 2, h: Math.pow(2, size) - 1,
         wires: [],
         text: [{ txt: "DCODE", x: 1, y: 0 }]
     };
@@ -181,11 +212,11 @@ for (let i = 0; i < 6; i++)
     comp.wires.push({ dir: "right", pos: 3 + i, txt: 1 << i });
 objTypes.push(comp);
 
-for (let size = 2; size <= 16; size++) { // Door
-    let name = "Door" + size;
-    objNames.set(name, objTypes.length);
+for (let size = 2; size <= 64; size++) { // Door
+    let name = "Door";
+    objNames.set(name + size, objTypes.length);
     let comp = {
-        name: name, w: 2, h: size - 1,
+        name, w: 2, h: size - 1,
         wires: [{ dir: "down", pos: 1, txt: "&" }],
         text: [{ txt: "DOOR", x: 1, y: 0 }]
     };
@@ -199,10 +230,10 @@ for (let size = 2; size <= 16; size++) { // Door
 
 
 for (let size = 2; size <= 16; size++) { // Number
-    let name = "Number" + size;
-    objNames.set(name, objTypes.length);
+    let name = "Number";
+    objNames.set(name + size, objTypes.length);
     let comp = {
-        name: name, w: 0, h: size-1, rotate: 3,
+        name, w: 0, h: size-1, rotate: 3,
         wires: [{ dir: "down", pos: 0 }],
         text: [{ txt: "", x: 1, y: 0 }],
         leds: []

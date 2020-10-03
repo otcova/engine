@@ -68,11 +68,11 @@ class Board {
 
     addObj(p, objType) {
         this.stopRun();
-        Module.__addObj(this.boardID, p.x, p.y, objType, objTypes[objType].rotate);
+        Module.__addObj(this.boardID, p.x, p.y, objType, getRotateOfObj(objTypes[objType].name));
     }
 
     canAddObj(objType, p) {
-        return Module.__canAddObj(this.boardID, p.x, p.y, objType, objTypes[objType].rotate);
+        return Module.__canAddObj(this.boardID, p.x, p.y, objType, getRotateOfObj(objTypes[objType].name));
     }
 
     removeObj(p) {
@@ -185,7 +185,7 @@ function drawObj(x, y, rotate, objID, ctx, red, ledPowerPtr, cNotsPtr, selected)
     if (obj == undefined) return;
 
     if (rotate == undefined) {
-        rotate = obj.rotate;
+        rotate = getRotateOfObj(obj.name);
         if (rotate == undefined)
             rotate = 0;
     }

@@ -20,9 +20,6 @@ std::vector<std::vector<Action>> undoActionsRegister;
 
 void pushActionGrup(const std::vector<Action>& actionGrup) {
     if (actionGrup.size() > 0) {
-        std::cout << " > " << actionGrup[0].wireNot.size() << "\n";
-        for (const auto& wn : actionGrup[0].wireNot)
-            std::cout << "  |" << wn << "\n";
         undoActionsRegister.clear();
         actionsRegister.emplace_back(actionGrup);
         if (actionsRegister.size() > 500) 
@@ -1009,7 +1006,8 @@ void LoadBoard(void* datav) {
         int objsLen = *(int*)data;
         data += sizeof(int);
         for (int i = 0; i < objsLen; i++) {
-            pair.second.objs.emplace_back(((int*)data)[0], ((int*)data)[1], ((int*)data)[2], ((int*)data)[3]);
+            int typeID = ((int*)data)[2];
+            pair.second.objs.emplace_back(((int*)data)[0], ((int*)data)[1], typeID, ((int*)data)[3]);
             int longMemoryLen = ((int*)data)[4];
             data += sizeof(int) * 5;
             for (int wni = 0; wni < pair.second.objs[i].wireNot.size(); wni++) {

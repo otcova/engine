@@ -179,7 +179,7 @@ function keyPressEv(e) {
 function rotateObjType(r) {
     let obj = objTypes[getObjByName(paletItems[paletIndex])];
     if (obj != undefined)
-        obj.rotate = r;
+        setRotateOfObj(obj.name, r);
 }
 
 paletIndex = 2;

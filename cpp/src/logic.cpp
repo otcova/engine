@@ -375,7 +375,7 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			}
 		}
 	}
-	else if (obj.typeID >= 65 && obj.typeID <= 79) // Dor
+	else if (obj.typeID >= 65 && obj.typeID <= 127) // Dor
 	{
 		int size = obj.typeID - 63;
 		if (get(b, grupsGet, obj, objt, 0)) {
@@ -385,9 +385,9 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			}
 		}
 	}
-	else if (obj.typeID >= 80 && obj.typeID <= 94) // Number
+	else if (obj.typeID >= 128 && obj.typeID <= 142) // Number
 	{
-		int size = (obj.typeID - 78) * 2;
+		int size = (obj.typeID - 126) * 2;
 		
 		if (get(b, grupsGet, obj, objt, 0) && obj.longMemory.size() > 0) {
 			for (int i = 1; i < size + 1; i+=2) {
