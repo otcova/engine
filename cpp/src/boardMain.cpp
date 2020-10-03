@@ -427,7 +427,7 @@ bool clickEvent(int boardID, int x, int y, bool make_undo) // mouse client
             else obj->memory[0] = 3-obj->memory[0];
             drawObj(*obj);
             return true;
-        } else if (obj->typeID >= 80 && obj->typeID <= 94) { // Number input
+        } else if (obj->typeID >= 128 && obj->typeID <= 142) { // Number input
             int size = obj->typeID - 78;
             if (obj->longMemory.size() == 0) {
                 obj->longMemory.reserve(size);
