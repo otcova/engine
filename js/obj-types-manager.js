@@ -46,14 +46,14 @@ function getRotateOfObj(name) {
         let xcomp = complexComps.get(name);
         return xcomp.rotate;
     }
-    return obj.rotate;
+    return objTypes[obj].rotate;
 }
 
 function setRotateOfObj(name, r) {
     let xcomp = complexComps.get(name);
     if (xcomp == undefined) {
         let obj = objNames.get(name);
-        obj.rotate = r;
+        objTypes[obj].rotate = r;
     } else {
         xcomp.rotate = r;
     }
