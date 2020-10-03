@@ -254,7 +254,7 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			obj.memory.push_back(0);
 		else if (++obj.memory[0] >= 16 * 2)
 			obj.memory[0] = 0;
-		set(b, grupsSet, obj, objt, 0, obj.memory[0] >= 16);
+		set(b, grupsSet, obj, objt, 0, obj.memory[0] >= 16*2 - 2);
 		return;
 	case 9: // Half adder
 	{
