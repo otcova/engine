@@ -1,8 +1,8 @@
 let objModelIndex = 2;
 let leftMenuData = [
-    ["Input", ["Switch", "Button", "Clock"]],
+    ["Input", ["Switch", "Button", "Number", "Clock"]],
     ["Output", ["Led", "Display", "Color Led", "Point Display"]],
-    ["Logic", ["And", "Or", "XOr", "Not", "Decoder", "Dor"]],
+    ["Logic", ["And", "Or", "XOr", "Not", "Decoder", "Door"]],
     ["Maths", ["Half adder", "Full adder"]],
     ["Memory", ["1 Bit", "D flip-flop", "Gated RS latch", "RS latch"]]
 ];
@@ -162,7 +162,7 @@ for (let size = 2; size <= 6; size++) { // Decoder
     };
     comp.text[0].y = comp.h / 2;
     for (let i = 0; i < size; i++)
-        comp.wires.push({ dir: "left", pos: i + Math.floor(comp.h / 2) });
+        comp.wires.push({ dir: "left", pos: i + Math.ceil((comp.h - size) / 2 ) });
     for (let i = 0; i <= comp.h; i++)
         comp.wires.push({ dir: "right", pos: i });
     objTypes.push(comp);
@@ -170,29 +170,47 @@ for (let size = 2; size <= 6; size++) { // Decoder
 
 objNames.set("Point Display", objTypes.length);
 let comp = {
-    name: "Point Display", w: 9, h: 9,
-    wires: [{ dir: "down", pos: 1, txt: "C" }, { dir: "down", pos: 2, txt: "S" }],
+    name: "Point Display", w: 9, h: 9, rotate: 3,
+    wires: [{ dir: "right", pos: 1, txt: "C" }, { dir: "right", pos: 2, txt: "S" }],
     leds: []
 };
 for (let y = 0; y < 8; y++)
     for (let x = 0; x < 8; x++)
         comp.leds.push({ x: x + 0.8, y: y + 0.8, w: 1.4, h: 1.4 });
 for (let i = 0; i < 6; i++)
-    comp.wires.push({ dir: "down", pos: 3 + i, txt: 1 << i });
+    comp.wires.push({ dir: "right", pos: 3 + i, txt: 1 << i });
 objTypes.push(comp);
 
-for (let size = 2; size <= 16; size++) { // Decoder
-    let name = "Dor" + size;
+for (let size = 2; size <= 16; size++) { // Door
+    let name = "Door" + size;
     objNames.set(name, objTypes.length);
     let comp = {
-        name: name, w: 1, h: size - 1,
-        wires: [{ dir: "down", pos: 0, txt: "&" }],
-        text: [{ txt: "", x: 1, y: 0 }]
+        name: name, w: 2, h: size - 1,
+        wires: [{ dir: "down", pos: 1, txt: "&" }],
+        text: [{ txt: "DOOR", x: 1, y: 0 }]
     };
     comp.text[0].y = comp.h / 2;
     for (let i = 0; i < size; i++)
         comp.wires.push({ dir: "left", pos: i });
     for (let i = 0; i <= comp.h; i++)
         comp.wires.push({ dir: "right", pos: i });
+    objTypes.push(comp);
+}
+
+
+for (let size = 2; size <= 16; size++) { // Number
+    let name = "Number" + size;
+    objNames.set(name, objTypes.length);
+    let comp = {
+        name: name, w: 0, h: size-1, rotate: 3,
+        wires: [{ dir: "down", pos: 0 }],
+        text: [{ txt: "", x: 1, y: 0 }],
+        leds: []
+    };
+    for (let i = 0; i < size; i++) {
+        comp.wires.push({ dir: "left", pos: i });
+        comp.wires.push({ dir: "right", pos: i });
+        comp.leds.push({ txt: true, on: "1", off: "0", undef: "0", x: 0, y: size - i - 1 });
+    }
     objTypes.push(comp);
 }

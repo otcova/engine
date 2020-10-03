@@ -1,3 +1,3 @@
-cd %~dp0\cpp\cmake-build-data
+cd "%~dp0\cpp\cmake-build-data"
 emmake make
-cd %~dp0
+cd "%~dp0"

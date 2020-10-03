@@ -22,7 +22,7 @@ void drawObj(const Obj& obj);
 void initRun(int boardID);
 void runStep(int boardID, bool autoRefresh);
 void stopRun(int boardID);
-bool clickEvent(int boardID, int x, int y);
+bool clickEvent(int boardID, int x, int y, bool make_undo = true);
 
 bool selectRect(int rectX, int rectY, int rectW, int rectH);
 void moveSelected(int dx, int dy);

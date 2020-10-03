@@ -6,6 +6,7 @@
 #include <emscripten.h>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <map>
 #include "board.h"
 #include "logic.h"
@@ -19,10 +20,13 @@ std::vector<std::vector<Action>> undoActionsRegister;
 
 void pushActionGrup(const std::vector<Action>& actionGrup) {
     if (actionGrup.size() > 0) {
-    undoActionsRegister.clear();
-    actionsRegister.emplace_back(actionGrup);
-    if (actionsRegister.size() > 70) 
-        actionsRegister.erase(actionsRegister.begin());
+        std::cout << " > " << actionGrup[0].wireNot.size() << "\n";
+        for (const auto& wn : actionGrup[0].wireNot)
+            std::cout << "  |" << wn << "\n";
+        undoActionsRegister.clear();
+        actionsRegister.emplace_back(actionGrup);
+        if (actionsRegister.size() > 500) 
+            actionsRegister.erase(actionsRegister.begin());
     }
 }
 
@@ -156,7 +160,7 @@ bool canAddWire(int boardID, int ax, int ay, int bx, int by, int cx, int cy)
     return true;
 }
 
-void changeNode(int x, int y) {
+void changeNode(int x, int y, std::vector<Action>* actionGrup = nullptr) {
     int count = 0;
     if (board.getWire(x, y, 0)) count++;
     if (board.getWire(x, y, 1)) count++;
@@ -164,10 +168,20 @@ void changeNode(int x, int y) {
     if (board.getWire(x, y - 1, 1)) count++;
 
     if (count < 3) {
-        board.getWireNode(x, y) = false;
+        auto node = board.getWireNode(x, y);
+        if (node) {
+            node = false;
+            if (actionGrup != nullptr)
+                actionGrup->emplace_back(x, y);
+        }
     }
     else if (count == 3) {
-        board.getWireNode(x, y) = true;
+        auto node = board.getWireNode(x, y);
+        if (!node) {
+            node = true;
+            if (actionGrup != nullptr)
+                actionGrup->emplace_back(x, y);
+        }
     }
 }
 
@@ -193,13 +207,13 @@ void setWire(int boardID, bool set, int ax, int ay, int bx, int by, int cx, int 
                 for (int y = MIN(by, cy); y < MAX(by, cy); ++y)
                     setSegWire(actionGrup, set, bx, y, 1);
                 for (int y = MIN(by, cy); y <= MAX(by, cy); ++y)
-                    changeNode(bx, y);
+                    changeNode(bx, y, &actionGrup);
             }
             else {
                 for (int x = MIN(bx, cx); x < MAX(bx, cx); ++x)
                     setSegWire(actionGrup, set, x, by, 0);
                 for (int x = MIN(bx, cx); x <= MAX(bx, cx); ++x)
-                    changeNode(x, bx);
+                    changeNode(x, by, &actionGrup);
             }
         }
         else {
@@ -209,9 +223,9 @@ void setWire(int boardID, bool set, int ax, int ay, int bx, int by, int cx, int 
                 setSegWire(actionGrup, set, bx, y, 1);
 
             for (int x = MIN(ax, bx); x <= MAX(ax, bx); ++x)
-                changeNode(x, ay);
+                changeNode(x, ay, &actionGrup);
             for (int y = MIN(by, cy); y <= MAX(by, cy); ++y)
-                changeNode(bx, y);
+                changeNode(bx, y, &actionGrup);
         }
     }
     else {
@@ -221,15 +235,15 @@ void setWire(int boardID, bool set, int ax, int ay, int bx, int by, int cx, int 
             setSegWire(actionGrup, set, x, by, 0);
 
         for (int y = MIN(ay, by); y <= MAX(ay, by); ++y)
-            changeNode(ax, y);
+            changeNode(ax, y, &actionGrup);
         for (int x = MIN(bx, cx); x <= MAX(bx, cx); ++x)
-            changeNode(x, by);
+            changeNode(x, by, &actionGrup);
     }
-
+    std::reverse(actionGrup.begin(), actionGrup.end());
     pushActionGrup(actionGrup);
 }
 
-void swapNode(int x, int y, std::vector<Action> actionGrup) 
+void swapNode(int x, int y, std::vector<Action>* actionGrup = nullptr) 
 {
     int count = 0;
     if (board.getWire(x, y, 0)) count++;
@@ -242,25 +256,28 @@ void swapNode(int x, int y, std::vector<Action> actionGrup)
         auto node = board.getWireNode(x, y);
         if (node != false) {
             node = false;
-            actionGrup.emplace_back(x, y);
+            if (actionGrup != nullptr)
+                actionGrup->emplace_back(x, y);
         }
     }
     else if (count == 3) {
         auto node = board.getWireNode(x, y);
         if (node != true) {
             node = true;
-            actionGrup.emplace_back(x, y);
+            if (actionGrup != nullptr)
+                actionGrup->emplace_back(x, y);
         }
     }
     else {
         board.getWireNode(x, y) = !board.getWireNode(x, y);
-        actionGrup.emplace_back(x, y);
+        if (actionGrup != nullptr)
+            actionGrup->emplace_back(x, y);
     }
 }
 
 void client_swapNode(int x, int y) {
     std::vector<Action> actionGrup;
-    swapNode(x, y, actionGrup);
+    swapNode(x, y, &actionGrup);
     pushActionGrup(actionGrup);
 }
 
@@ -331,7 +348,7 @@ void removeObj(int boardID, int x, int y, bool makeUndo)
                     wchIt->second.objs[i].getWidth(), wchIt->second.objs[i].getHeight())) {
                     if (makeUndo) {
                         std::vector<Action> actionGrup;
-                        actionGrup.emplace_back(false, wchIt->second.objs[i].x, wchIt->second.objs[i].y, wchIt->second.objs[i].typeID, wchIt->second.objs[i].rotate, wchIt->second.objs[i].wireNot);
+                        actionGrup.emplace_back(false, wchIt->second.objs[i].x, wchIt->second.objs[i].y, wchIt->second.objs[i].typeID, wchIt->second.objs[i].rotate, wchIt->second.objs[i].wireNot, wchIt->second.objs[i].longMemory);
                         pushActionGrup(actionGrup);
                     }
                     wchIt->second.objs.erase(wchIt->second.objs.begin() + i);
@@ -399,7 +416,7 @@ bool swapObjNot(int x, int y, int d, bool makeUndo) {
     return false;
 }
 
-bool clickEvent(int boardID, int x, int y)
+bool clickEvent(int boardID, int x, int y, bool make_undo) // mouse client
 {
     Obj* obj = board.getObjAt(x, y);
     if (obj != nullptr) {
@@ -413,6 +430,34 @@ bool clickEvent(int boardID, int x, int y)
             else obj->memory[0] = 3-obj->memory[0];
             drawObj(*obj);
             return true;
+        } else if (obj->typeID >= 80 && obj->typeID <= 94) { // Number input
+            int size = obj->typeID - 78;
+            if (obj->longMemory.size() == 0) {
+                obj->longMemory.reserve(size);
+                for (int i = 0; i < size; i++) {
+                    obj->longMemory.push_back(0);
+                }
+            }
+            --size;
+            int mouse = 0;
+            if (obj->rotate == 0) {
+                mouse = size - (y - obj->y);
+            } else if (obj->rotate == 1) {
+                mouse = size - (x - obj->x);
+            }else if (obj->rotate == 2) {
+                mouse = y - obj->y;
+            } else if (obj->rotate == 3) {
+                mouse = x - obj->x;
+            }
+            obj->longMemory[mouse] = !obj->longMemory[mouse];
+            if (make_undo) {
+                std::vector<Action> actionGrup;
+                actionGrup.emplace_back(Action::longMemClick, x, y);
+                pushActionGrup(actionGrup);
+            }
+            drawObj(*obj);
+            
+            return true;
         }
     }
     return false;
@@ -421,23 +466,27 @@ bool clickEvent(int boardID, int x, int y)
 void addObj(int boardID, int x, int y, int typeID, int rotate, bool makeUndo)
 {
     if (canAddObj(boardID, x, y, typeID, rotate)) {
-        board.objsMap[board.getObjChunkCoords(x, y).hash()].objs.emplace_back(x, y, typeID, rotate);
+        Obj obj(x, y, typeID, rotate);
+        board.objsMap[board.getObjChunkCoords(x, y).hash()].objs.push_back(obj);
         if (makeUndo) {
             std::vector<Action> actionGrup;
-            actionGrup.emplace_back(true, x, y, typeID, rotate);
+            actionGrup.emplace_back(true, x, y, typeID, rotate, obj.wireNot);
             pushActionGrup(actionGrup);
         }
     }
 }
 
 void drawObj(const Obj& obj) {
-    if (obj.memory.size() == 0) {
-        EM_ASM({ drawObj($0, $1, $2, $3, canvas.ctxo, false, undefined, $4); },
-            obj.x, obj.y, obj.rotate, obj.typeID, & obj.wireNot[0]);
-    }
-    else {
+    
+    if (obj.memory.size() != 0) {
         EM_ASM({ drawObj($0, $1, $2, $3, canvas.ctxo, false, $4, $5); },
             obj.x, obj.y, obj.rotate, obj.typeID, & obj.memory[0], & obj.wireNot[0]);
+    } else if (obj.longMemory.size()) {
+        EM_ASM({ drawObj($0, $1, $2, $3, canvas.ctxo, false, $4, $5); },
+            obj.x, obj.y, obj.rotate, obj.typeID, & obj.longMemory[0], & obj.wireNot[0]);
+    } else {
+        EM_ASM({ drawObj($0, $1, $2, $3, canvas.ctxo, false, undefined, $4); },
+            obj.x, obj.y, obj.rotate, obj.typeID, & obj.wireNot[0]);
     }
 }
 
@@ -464,31 +513,31 @@ void propagateGrup(int x, int y, int d, bool first) {
         wireGrup = grups.size();
 
         Obj* obj = board.getObjAt(x, y);
-        if (obj == nullptr || (getObjType(obj->typeID).w == 0 && getObjType(obj->typeID).h == 0)) {
-            int count = 0;
-            if (board.getWire(x, y, 1 - d)) count++;
-            if (board.getWire(x - d, y - 1 + d, 1 - d)) count++;
-            if (board.getWire(x - 1 + d, y - d, d)) count++;
+        bool objColl = obj == nullptr || (getObjType(obj->typeID).w == 0 && getObjType(obj->typeID).h == 0);
+        int count = 0;
+        if (board.getWire(x, y, 1 - d)) count++;
+        if (board.getWire(x - d, y - 1 + d, 1 - d)) count++;
+        if (board.getWire(x - 1 + d, y - d, d)) count++;
 
-            if (count == 1 || board.getWireNode(x, y)) {
-                propagateGrup(x, y, 1 - d, false);
-                propagateGrup(x - d, y - 1 + d, 1 - d, false);
-            }
-            propagateGrup(x - 1 + d, y - d, d, false);
+        if (objColl && (count == 1 || board.getWireNode(x, y))) {
+            propagateGrup(x, y, 1 - d, false);
+            propagateGrup(x - d, y - 1 + d, 1 - d, false);
         }
+        propagateGrup(x - 1 + d, y - d, d, false);
+        
         obj = board.getObjAt(x + 1 - d, y + d);
-        if (obj == nullptr || (getObjType(obj->typeID).w == 0 && getObjType(obj->typeID).h == 0)) {
-            int count = 0;
-            if (board.getWire(x + 1 - d, y + d, 1 - d)) count++;
-            if (board.getWire(x + 1 - d * 2, y - 1 + d * 2, 1 - d)) count++;
-            if (board.getWire(x + 1 - d, y + d, d)) count++;
+        objColl = obj == nullptr || (getObjType(obj->typeID).w == 0 && getObjType(obj->typeID).h == 0);
+        count = 0;
+        if (board.getWire(x + 1 - d, y + d, 1 - d)) count++;
+        if (board.getWire(x + 1 - d * 2, y - 1 + d * 2, 1 - d)) count++;
+        if (board.getWire(x + 1 - d, y + d, d)) count++;
 
-            if (count == 1 || board.getWireNode(x + 1 - d, y + d)) {
-                propagateGrup(x + 1 - d, y + d, 1 - d, false);
-                propagateGrup(x + 1 - d * 2, y - 1 + d * 2, 1 - d, false);
-            }
-            propagateGrup(x + 1 - d, y + d, d, false);
+        if (objColl && (count == 1 || board.getWireNode(x + 1 - d, y + d))) {
+            propagateGrup(x + 1 - d, y + d, 1 - d, false);
+            propagateGrup(x + 1 - d * 2, y - 1 + d * 2, 1 - d, false);
         }
+        propagateGrup(x + 1 - d, y + d, d, false);
+        
         if (first) grups.push_back(false);
     }
 }
@@ -583,7 +632,7 @@ bool selectRect(int rectX, int rectY, int rectW, int rectH)
                 if (checkCollide(rectX, rectY, rectW, rectH, wchIt->second.objs[i].x, wchIt->second.objs[i].y, wchIt->second.objs[i].getWidth(), wchIt->second.objs[i].getHeight())) {
                     wchIt->second.objs[i].memory.clear();
                     selectedObjs.push_back(wchIt->second.objs[i]);
-                    actionGrup.emplace_back(false, wchIt->second.objs[i].x, wchIt->second.objs[i].y, wchIt->second.objs[i].typeID, wchIt->second.objs[i].rotate, wchIt->second.objs[i].wireNot);
+                    actionGrup.emplace_back(false, wchIt->second.objs[i].x, wchIt->second.objs[i].y, wchIt->second.objs[i].typeID, wchIt->second.objs[i].rotate, wchIt->second.objs[i].wireNot, wchIt->second.objs[i].longMemory);
                     wchIt->second.objs.erase(wchIt->second.objs.begin() + i);
                     --i;
                 }
@@ -747,7 +796,7 @@ void unSelect()
 
             for (const auto& obj : selectedObjs) {
                 board.objsMap[board.getObjChunkCoords(obj.x, obj.y).hash()].objs.push_back(obj);
-                actionsRegister[actionsRegister.size() - 1].emplace_back(true, obj.x, obj.y, obj.typeID, obj.rotate, obj.wireNot);
+                actionsRegister[actionsRegister.size() - 1].emplace_back(true, obj.x, obj.y, obj.typeID, obj.rotate, obj.wireNot, obj.longMemory);
             }
 
             for (const auto& w : selectedWires) {
@@ -757,7 +806,7 @@ void unSelect()
             for (const auto& node : selectedNodes) {
                 auto wireNode = board.getWireNode(node.x, node.y);
                 if (!wireNode) {
-                    swapNode(node.x, node.y, {});
+                    swapNode(node.x, node.y);
                     if (wireNode != board.getWireNode(node.x, node.y))
                         actionsRegister[actionsRegister.size() - 1].emplace_back(node.x, node.y);
                 }
@@ -810,8 +859,16 @@ void drawSelect(double scale, double boardX, double boardY)
     }
     
     for (const auto& obj : selectedObjs) {
-        EM_ASM({ drawObj($0, $1, $2, $3, canvas.ctxt, $5, undefined, $4, true); },
-            obj.x, obj.y, obj.rotate, obj.typeID, & obj.wireNot[0], !canPlace);
+        if (obj.memory.size() != 0) {
+            EM_ASM({ drawObj($0, $1, $2, $3, canvas.ctxt, $5, $6, $4, true); },
+                obj.x, obj.y, obj.rotate, obj.typeID, & obj.wireNot[0], !canPlace, &obj.memory[0]);
+        } else if (obj.longMemory.size() != 0) {
+            EM_ASM({ drawObj($0, $1, $2, $3, canvas.ctxt, $5, $6, $4, true); },
+                obj.x, obj.y, obj.rotate, obj.typeID, & obj.wireNot[0], !canPlace, &obj.longMemory[0]);
+        } else {
+            EM_ASM({ drawObj($0, $1, $2, $3, canvas.ctxt, $5, undefined, $4, true); },
+                obj.x, obj.y, obj.rotate, obj.typeID, & obj.wireNot[0], !canPlace);
+        }
     }
 }
 
@@ -859,7 +916,7 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
     if (actionsRegister.size() > 0) {
         std::vector<Action>& actionGrup = actionsRegister.back();
         std::vector<sNode> nodes;
-
+        
         for (int i = 0; i < actionGrup.size(); i++) {
             if (addReverse) i = actionGrup.size() - i - 1;
             if (actionGrup[i].type == Action::Type::SetSegWire) {
@@ -870,7 +927,7 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
             }
             else if (actionGrup[i].type == Action::Type::SwapNode) {
                 nodes.emplace_back(actionGrup[i].x, actionGrup[i].y);
-                swapNode(actionGrup[i].x, actionGrup[i].y, {});
+                swapNode(actionGrup[i].x, actionGrup[i].y);
             }
             else if (actionGrup[i].type == Action::Type::SetObj) {
                 if (actionGrup[i].set == addReverse) {
@@ -880,6 +937,7 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
                     if (canAddObj(0, actionGrup[i].x, actionGrup[i].y, actionGrup[i].typeID, actionGrup[i].rotate)) {
                         Obj obj(actionGrup[i].x, actionGrup[i].y, actionGrup[i].typeID, actionGrup[i].rotate);
                         obj.wireNot = actionGrup[i].wireNot;
+                        obj.longMemory = actionGrup[i].longMemory;
                         board.objsMap[board.getObjChunkCoords(actionGrup[i].x, actionGrup[i].y).hash()].objs.push_back(obj);
                     }
                 }
@@ -889,6 +947,8 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
             }
             else if (actionGrup[i].type == Action::Type::Select) {
                 deleteSelected();
+            } else if (actionGrup[i].type == Action::Type::longMemClick) {
+                clickEvent(0, actionGrup[i].x, actionGrup[i].y, false);
             }
             if (addReverse) i = actionGrup.size() - i - 1;
         }
@@ -950,13 +1010,17 @@ void LoadBoard(void* datav) {
         data += sizeof(int);
         for (int i = 0; i < objsLen; i++) {
             pair.second.objs.emplace_back(((int*)data)[0], ((int*)data)[1], ((int*)data)[2], ((int*)data)[3]);
-            data += sizeof(int) * 4;
+            int longMemoryLen = ((int*)data)[4];
+            data += sizeof(int) * 5;
             for (int wni = 0; wni < pair.second.objs[i].wireNot.size(); wni++) {
                 pair.second.objs[i].wireNot[wni] = *data;
                 data += sizeof(char);
-                //pair.second.objs[i].wireNot[wni] = (data[wni / 8] >> (7 - (wni & 0x7)) & 0x1);
             }
-            //data += (pair.second.objs[i].wireNot.size()) / 8 + 1;
+            pair.second.objs[i].longMemory.reserve(longMemoryLen);
+            for (int memi = 0; memi < longMemoryLen; memi++) {
+                pair.second.objs[i].longMemory.push_back(*data);
+                data += sizeof(char);
+            }
         }
         board.objsMap.insert(pair);
     }
@@ -969,9 +1033,10 @@ void* SaveBoard() {
     int32_t wiresMemorySize = board.wiresMap.size() * sizeof(std::pair<int64_t, StoreWireChunk>);
     int32_t objMemorySize = board.objsMap.size() * (sizeof(int) + sizeof(int64_t));
     for (const auto& [chPos, oCh] : board.objsMap) {
-        objMemorySize += oCh.objs.size() * 4 * sizeof(int);
+        objMemorySize += oCh.objs.size() * 5 * sizeof(int);
         for (int oi = 0; oi < oCh.objs.size(); oi++) {
             objMemorySize += oCh.objs[oi].wireNot.size() * sizeof(char);
+            objMemorySize += oCh.objs[oi].longMemory.size() * sizeof(char);
         }
     }
     const int32_t dataSize = wiresMemorySize + objMemorySize + sizeof(int32_t) * 3;
@@ -1002,13 +1067,16 @@ void* SaveBoard() {
             ((int*)data)[1] = oCh.objs[oi].y;
             ((int*)data)[2] = oCh.objs[oi].typeID;
             ((int*)data)[3] = oCh.objs[oi].rotate;
-            data += sizeof(int) * 4;
+            ((int*)data)[4] = oCh.objs[oi].longMemory.size();
+            data += sizeof(int) * 5;
             for (int wni = 0; wni < oCh.objs[oi].wireNot.size(); wni++) {
                 *data = oCh.objs[oi].wireNot[wni];
                 data += sizeof(char);
-                //data[wni/8] = data[wni / 8] | (oCh.objs[oi].wireNot[wni] & 0x1) << (7 - (wni & 0x7));
             }
-            //data += oCh.objs[oi].wireNot.size() / 8 + 1;
+            for (int memi = 0; memi < oCh.objs[oi].longMemory.size(); memi++) {
+                *data = oCh.objs[oi].longMemory[memi];
+                data += sizeof(char);
+            }
         }
     }
     return datav;

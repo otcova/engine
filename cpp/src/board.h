@@ -102,7 +102,8 @@ struct Action
         SwapNode,
         SetObj,
         SwapObjNot,
-        Select
+        Select,
+        longMemClick
     };
     Type type;
 
@@ -113,6 +114,7 @@ struct Action
     int rotate;
 
     std::vector<char> wireNot;
+    std::vector<char> longMemory;
 
     Action(const Type &type)
         : type(type) {}
@@ -122,12 +124,18 @@ struct Action
 
     Action(int x, int y)
         : type(Type::SwapNode), x(x), y(y) {}
+    
+    Action(Type type, int x, int y)
+        : type(type), x(x), y(y) {}
 
     Action(bool set, int x, int y, int typeID, int rotate)
         : type(Type::SetObj), set(set), x(x), y(y), typeID(typeID), rotate(rotate) {}
-
+    
     Action(bool set, int x, int y, int typeID, int rotate, const std::vector<char> &wireNot)
         : type(Type::SetObj), set(set), x(x), y(y), typeID(typeID), rotate(rotate), wireNot(wireNot) {}
+        
+    Action(bool set, int x, int y, int typeID, int rotate, const std::vector<char> &wireNot, const std::vector<char> &longMem)
+        : type(Type::SetObj), set(set), x(x), y(y), typeID(typeID), rotate(rotate), wireNot(wireNot), longMemory(longMem) {}
 
     Action(int x, int y, int d)
         : type(Type::SwapObjNot), x(x), y(y), d(d) {}
@@ -193,6 +201,7 @@ struct Obj
 {
     int x, y, typeID, rotate;
     std::vector<char> memory;
+    std::vector<char> longMemory;
     std::vector<char> wireNot;
 
     Obj(int x, int y, int typeID, int rotate)

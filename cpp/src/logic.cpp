@@ -385,4 +385,17 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			}
 		}
 	}
+	else if (obj.typeID >= 80 && obj.typeID <= 94) // Number
+	{
+		int size = (obj.typeID - 78) * 2;
+		
+		if (get(b, grupsGet, obj, objt, 0) && obj.longMemory.size() > 0) {
+			for (int i = 1; i < size + 1; i+=2) {
+				if (obj.longMemory[i/2]) {
+					set(b, grupsSet, obj, objt, size - i, true);
+					set(b, grupsSet, obj, objt, size - i+1, true);
+				}
+			}
+		}
+	}
 }

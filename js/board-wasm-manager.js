@@ -331,9 +331,9 @@ function drawObj(x, y, rotate, objID, ctx, red, ledPowerPtr, cNotsPtr, selected)
                     ty = h - led.x;
                 } else if (rotate == 2) {
                     tx = w - led.x;
-                    ty = led.y;
+                    ty = h - led.y;
                 } else if (rotate == 3) {
-                    tx = led.y;
+                    tx = w - led.y;
                     ty = led.x;
                 }
                 ctx.fillStyle = "#FFF";
@@ -355,7 +355,7 @@ function drawObj(x, y, rotate, objID, ctx, red, ledPowerPtr, cNotsPtr, selected)
                 else if (ledColor == 5) ctx.fillStyle = "#F4F";
                 else if (ledColor == 6) ctx.fillStyle = "#FF4";
                 else ctx.fillStyle = "#FFF";
-                ++i;
+                
 
                 rectX = x + led.x - 0.5 + 0.22;
                 rectY = y + led.y - 0.5 + 0.22;
@@ -365,6 +365,7 @@ function drawObj(x, y, rotate, objID, ctx, red, ledPowerPtr, cNotsPtr, selected)
                     Math.round(rectW * board.scale), Math.round(rectH * board.scale));
 
             }
+            ++i;
         }
     }
 
