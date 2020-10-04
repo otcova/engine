@@ -58,7 +58,7 @@ flags: overflow, equal
 0b001010	cmp // compare ra, rb
 0b011010	jmp // jump to n
 0b101010	get arrows-flags // ra = arrows-flags
-0b111010	get arrows-pos rb // rb = arrows-pos
+0b111010	get arrows-flags rb // rb = arrows-flags
 
 0b001011	jnf // jump if no flag
 0b011011	je // jump if equal flag
@@ -84,15 +84,12 @@ flags: overflow, equal
 
 
 
+def d1 TAIL-LEN
+def d2 SNAKE-DIR
+def d3 COIN-POS
 
-
-
-d1 -> TAIL-LEN
-d2 -> SNAKE-DIR
-d3 -> COIN-POS
-
-r0 -> SNAKE HEAD
-rx -> TAIL POS
+def r0 SNAKE HEAD
+def rx TAIL POS
 
 
 #START:
@@ -107,8 +104,8 @@ CHECK-COIN-POS:
 	get TAIL-LEN
 	move d0
 	get COIN-POS
-	swap
 	led ra
+	swap
 CHECK-COIN-LOOP:
 	load ra d0
 	led ra
@@ -118,7 +115,7 @@ CHECK-COIN-LOOP:
 	cje
 	UPDATE-COIN-POS
 	--d0
-	jg 
+	jo
 	END-CHECK-COIN
 	jmp 
 	CHECK-COIN-LOOP
@@ -126,15 +123,15 @@ END-CHECK-COIN:
 	frame
 	
 #GET-INPUT:
-	get SNAKE-DIR
-	set rb
+	get SNAKE-DIR            // get arrows-flags
+	set rb                   // clear rb
 	0b100000
 	xor
-	get arrow-pod rb
-	cje
-	MOVE-SNAKE
+	get arrows-flags rb
+	cje                      // cje
+	MOVE-SNAKE               // MOVE-SNAKE 
 	swap
-	move SNAKE-DIR
+	move SNAKE-DIR           // move SNAKE-DIR
 MOVE-SNAKE:
 	clear d0
 	load rb d0
@@ -146,8 +143,11 @@ MOVE-SNAKE:
 	clear ra
 	load rb ra
 	get COIN-POS
-	cjne 
+	cje
+	GET-COIN-SCORE-CONTINUE
+	jmp
 	END-COIN-SCORE
+GET-COIN-SCORE-CONTINUE:
 	get TAIL-LEN
 	++ra
 	move TAIL-LEN

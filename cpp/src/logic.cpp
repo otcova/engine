@@ -154,6 +154,8 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			if (s && !obj.memory[1])
 				obj.memory[0] = get(b, grupsGet, obj, objt, 2);
 			set(b, grupsSet, obj, objt, 0, obj.memory[0]);
+		} else {
+			set(b, grupsSet, obj, objt, 0, false);
 		}
 		obj.memory[1] = s;
 		return;
@@ -356,35 +358,35 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 	else if (obj.typeID == 64) // Point Display
 	{
 		if (obj.memory.size() == 0) {
-			for (int i = 0; i < 64; i++)
+			for (int i = 0; i < 64 * 2; i++)
 				obj.memory.push_back(0);
+			obj.memory.push_back(0);
 		}
-		if (get(b, grupsGet, obj, objt, 0)) {
-			for (int i = 0; i < 64; i++)
-				obj.memory[i] = 0;
+		char clear = get(b, grupsGet, obj, objt, 0);
+		if (clear && !obj.memory[64 * 2]) {
+			for (int i = 0; i < 64; i++) {
+				obj.memory[i] = obj.memory[64 + i];
+				obj.memory[64 + i] = 0;
+			}
 			drawObj(obj);
 		} else if (get(b, grupsGet, obj, objt, 1)) {
-			unsigned char number = 0;
+			unsigned int number = 0;
 			if (get(b, grupsGet, obj, objt, 2)) number |= 0b1;
 			if (get(b, grupsGet, obj, objt, 3)) number |= 0b10;
 			if (get(b, grupsGet, obj, objt, 4)) number |= 0b100;
 			if (get(b, grupsGet, obj, objt, 5)) number |= 0b1000;
 			if (get(b, grupsGet, obj, objt, 6)) number |= 0b10000;
 			if (get(b, grupsGet, obj, objt, 7)) number |= 0b100000;
-			if (obj.memory[number] == 0) {
-				obj.memory[number] = 7;
-				drawObj(obj);
-			}
+			obj.memory[64 + number] = 7;
 		}
+		obj.memory[64 * 2] = clear;
 	}
 	else if (obj.typeID >= 65 && obj.typeID <= 127) // Dor
 	{
 		int size = obj.typeID - 63;
 		if (get(b, grupsGet, obj, objt, 0) || get(b, grupsGet, obj, objt, 1)) {
 			for (int i = 0; i < size; i++) {
-				if (get(b, grupsGet, obj, objt, i+2)) {
-					set(b, grupsSet, obj, objt, size + i + 2, true);
-				}
+				set(b, grupsSet, obj, objt, size + i + 2, get(b, grupsGet, obj, objt, i+2));
 			}
 		}
 	}

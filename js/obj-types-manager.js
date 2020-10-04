@@ -195,7 +195,7 @@ for (let size = 2; size <= 6; size++) { // Decoder
     for (let i = 0; i < size; i++)
         comp.wires.push({ dir: "left", pos: i + Math.ceil((comp.h - size) / 2 ), txt: "" + Math.pow(2, i) });
     for (let i = 0; i <= comp.h; i++)
-        comp.wires.push({ dir: "right", pos: i });
+        comp.wires.push({ dir: "right", pos: i, txt: "" + i });
     objTypes.push(comp);
 }
 
