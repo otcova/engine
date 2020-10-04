@@ -157,7 +157,7 @@ objTypes.push({
 objNames.set("RS latch", objTypes.length);// 13
 objTypes.push({
     name: "RS latch", w: 1, h: 1,
-    wires: [{ dir: "right", pos: 0, txt: "Q" }, { dir: "left", pos: 0, txt: "S" }, { dir: "left", pos: 1, txt: "R" }],
+    wires: [{ dir: "left", pos: 0, txt: "S" }, { dir: "left", pos: 1, txt: "R" }, { dir: "right", pos: 0, txt: "Q" }],
     text: [{ txt: "RS", x: 0.5, y: 0.5 }]
 });
 
@@ -193,7 +193,7 @@ for (let size = 2; size <= 6; size++) { // Decoder
     };
     comp.text[0].y = comp.h / 2;
     for (let i = 0; i < size; i++)
-        comp.wires.push({ dir: "left", pos: i + Math.ceil((comp.h - size) / 2 ) });
+        comp.wires.push({ dir: "left", pos: i + Math.ceil((comp.h - size) / 2 ), txt: "" + Math.pow(2, i) });
     for (let i = 0; i <= comp.h; i++)
         comp.wires.push({ dir: "right", pos: i });
     objTypes.push(comp);

@@ -33,8 +33,8 @@ flags: overflow, equal
 0b100101	move d2 // d2 = ra
 0b110101	move d3 // d3 = ra
 
-0b000110	load ra// ra = ram[ra]
-0b010110	load rb// rb = ram[ra]
+0b000110	load ra rb // ra = ram[rb]
+0b010110	load rb ra // rb = ram[ra]
 0b100110	load ra d0 // ra = ram[d0]
 0b110110	load rb d0 // rb = ram[d0]
 
@@ -71,10 +71,10 @@ flags: overflow, equal
 0b111100	cjeo // comp and jump to n if overflow or equal
 
 ---- INPUT ----
-0b001101	in-arrow-up // set flag equal if input and makes an jne
-0b011101	in-arrow-down // set flag equal if input and makes an jne
-0b101101	in-arrow-left // set flag equal if input and makes an jne
-0b111101	in-arrow-right // set flag equal if input and makes an jne
+0b001101	in-arrow-up // jumps if no input
+0b011101	in-arrow-right // jumps if no input
+0b101101	in-arrow-down // jumps if no input
+0b111101	in-arrow-left // jumps if no input
 
 --- OUTPUT ---
 0b001110	print // outs ra to display A
@@ -110,7 +110,7 @@ CHECK-COIN-POS:
 	swap
 	led ra
 CHECK-COIN-LOOP:
-	load d0
+	load ra d0
 	led ra
 	++d0
 	store d0
@@ -144,7 +144,7 @@ MOVE-SNAKE:
 
 #GET-COIN-SCORE:
 	clear ra
-	load rb
+	load rb ra
 	get COIN-POS
 	cjne 
 	END-COIN-SCORE
