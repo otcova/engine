@@ -123,15 +123,15 @@ END-CHECK-COIN:
 	frame
 	
 #GET-INPUT:
-	get SNAKE-DIR            // get arrows-flags
-	set rb                   // clear rb
-	0b100000
-	xor
-	get arrows-flags rb
-	cje                      // cje
-	MOVE-SNAKE               // MOVE-SNAKE 
-	swap
-	move SNAKE-DIR           // move SNAKE-DIR
+	get arrows-flags
+	clear rb
+	cje
+	MOVE-SNAKE 
+	move SNAKE-DIR
+	none
+	none
+	none
+	none
 MOVE-SNAKE:
 	clear d0
 	load rb d0

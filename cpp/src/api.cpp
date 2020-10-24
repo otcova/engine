@@ -17,71 +17,76 @@ extern "C"
     }
 
     EMSCRIPTEN_KEEPALIVE void
-    _initRun(int boardID) {
-        initRun(boardID);
+    _initRun() {
+        initRun();
     }
-
+    
     EMSCRIPTEN_KEEPALIVE void
-    _runStep(int boardID, bool autoRefresh) {
-        runStep(boardID, autoRefresh);
+    _set_async(bool async_is_on) {
+        set_async(async_is_on);
+    }
+    
+    EMSCRIPTEN_KEEPALIVE void
+    _runStep() {
+        runStep();
     }
     EMSCRIPTEN_KEEPALIVE void
-    _stopRun(int boardID) {
-        stopRun(boardID);
+    _stopRun() {
+        stopRun();
     }
 
     // Wire
 
     EMSCRIPTEN_KEEPALIVE bool
-    _canAddWire(int boardID, int ax, int ay, int bx, int by, int cx, int cy) {
-        return canAddWire(boardID, ax, ay, bx, by, cx, cy);
+    _canAddWire(int ax, int ay, int bx, int by, int cx, int cy) {
+        return canAddWire(ax, ay, bx, by, cx, cy);
     }
 
     EMSCRIPTEN_KEEPALIVE void 
-    _setWire(int boardID, bool set, int ax, int ay, int bx, int by, int cx, int cy) {
-        setWire(boardID, set, ax, ay, bx, by, cx, cy);
+    _setWire(bool set, int ax, int ay, int bx, int by, int cx, int cy) {
+        setWire(set, ax, ay, bx, by, cx, cy);
     }
 
     EMSCRIPTEN_KEEPALIVE void
-    _swapNode(int boardID, int x, int y) {
+    _swapNode(int x, int y) {
         client_swapNode(x, y);
     }
 
     EMSCRIPTEN_KEEPALIVE void 
-    _drawWires(int boardID, double scale, double rectX, double rectY, double rectW, double rectH) {
-        drawWires(boardID, scale, rectX, rectY, rectW, rectH);
+    _drawWires(double scale, double rectX, double rectY, double rectW, double rectH) {
+        drawWires(scale, rectX, rectY, rectW, rectH);
     }
 
     //Objs
 
     EMSCRIPTEN_KEEPALIVE bool
-        _clickEvent(int boardID, int x, int y) {
-        return clickEvent(boardID, x, y);
+        _clickEvent(int x, int y) {
+        return clickEvent(x, y);
     }
 
     EMSCRIPTEN_KEEPALIVE bool
-        _swapObjNot(int boardID, int x, int y, int d) {
-        return swapObjNot(boardID, x, y, d);
+        _swapObjNot(int x, int y, int d) {
+        return swapObjNot(x, y, d, true);
     }
 
     EMSCRIPTEN_KEEPALIVE bool
-    _canAddObj(int boardID, int x, int y, int typeID, int rotate) {
-        return canAddObj(boardID, x, y, typeID, rotate);
+    _canAddObj(int x, int y, int typeID, int rotate) {
+        return canAddObj(x, y, typeID, rotate);
     }
 
     EMSCRIPTEN_KEEPALIVE void
-    _addObj(int boardID, int x, int y, int typeID, int rotate) {
-        addObj(boardID, x, y, typeID, rotate);
+    _addObj(int x, int y, int typeID, int rotate) {
+        addObj(x, y, typeID, rotate);
     }
     
     EMSCRIPTEN_KEEPALIVE void
-    _removeObj(int boardID, int x, int y) {
-        removeObj(boardID, x, y);
+    _removeObj(int x, int y) {
+        removeObj(x, y);
     }
 
     EMSCRIPTEN_KEEPALIVE void
-    _drawObjs(int boardID, double scale, double rectX, double rectY, double rectW, double rectH) {
-        drawObjs(boardID, scale, rectX, rectY, rectW, rectH);
+    _drawObjs(double scale, double rectX, double rectY, double rectW, double rectH) {
+        drawObjs(scale, rectX, rectY, rectW, rectH);
     }
 
     // Select

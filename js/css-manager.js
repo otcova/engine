@@ -95,7 +95,7 @@ function selectPalet(n, autoUnSelect) {
         else selectItemButton(e);
     }
 
-    refreshCanvasTemp();
+    requestDrawAll = true;
 }
 
 //let wiresMapMemoryPtr = undefined;
@@ -144,7 +144,7 @@ function keyPressEv(e) {
             console.log("Saved: ", (Module.HEAP32[wiresMapMemoryPtr / (32 / 8)] / 1024).toPrecision(2) + "KB");
             let memory = new Uint8Array(Module.HEAP8.buffer, wiresMapMemoryPtr, Module.HEAP32[wiresMapMemoryPtr / (32 / 8)])
             saveDataToFile("board.cir", memory);
-            refreshAllCanvas();
+            requestDrawAll = true;
         }
 
         else if (e.key == "Delete" || e.key == "Backspace") board.deleteSelected();
@@ -171,8 +171,7 @@ function keyPressEv(e) {
         else if (e.key == "s" || e.key == "S") rotateObjType(3);
         else if (e.key == "d" || e.key == "D") rotateObjType(0);
     }
-
-    refreshCanvasTemp();
+    requestDrawAll = true;
     if (e.key != "Control") keyRepeat = true;
 }
 
@@ -200,7 +199,8 @@ function stepButtonOnClick() {
         updateButtonsPlayStop();
         selectPalet(2);
     } else {
-        board.runStep(true);
+        board.runStep();
+        requestDrawObjWire = true;
     }
 }
 
@@ -209,10 +209,11 @@ function stopButtonOnClick() {
 }
 
 function pauseButtonOnClick() {
+    board.set_async_run(false);
     board.state = "pause";
-    board.runStep(true);
     updateButtonsPlayStop();
-    refreshAllCanvas();
+    board.runStep();
+    requestDrawAll = true;
 }
 
 function updateButtonsPlayStop() {
@@ -223,6 +224,7 @@ function updateButtonsPlayStop() {
 }
 
 function playButtonOnClick() {
+    if (runDelay == 0) board.set_async_run(true);
     if (board.state == "edit") board.initRun();
     board.state = "play";
     updateButtonsPlayStop();

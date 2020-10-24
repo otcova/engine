@@ -120,10 +120,9 @@ inline void set(Board &board, std::vector<bool> &grups, const Obj &obj, const Ob
 	}
 }
 
-void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &grupsSet, bool draw)
+void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &grupsSet)
 {
 	const ObjType &objt = getObjType(obj.typeID);
-	bool changes = false;
 	switch (obj.typeID)
 	{
 	case 0: //Button
@@ -132,7 +131,7 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 		else if (obj.memory[0] > 0)
 		{
 			obj.memory[0] -= 1;
-			drawObj(obj);
+			// drawObj(obj);
 		}
 		set(b, grupsSet, obj, objt, 0, obj.memory[0]);
 		set(b, grupsSet, obj, objt, 1, obj.memory[0]);
@@ -176,7 +175,6 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 		return;
 	case 5: // Led
 	{
-		if (draw)
 		{
 			bool update = false;
 			bool state = get(b, grupsGet, obj, objt, 0) || get(b, grupsGet, obj, objt, 1) || get(b, grupsGet, obj, objt, 2) || get(b, grupsGet, obj, objt, 3);
@@ -190,14 +188,13 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 				obj.memory[0] = state ? 7 : 0;
 				update = true;
 			}
-			if (update)
-				drawObj(obj);
+			//if (update)
+			//	drawObj(obj);
 		}
 		return;
 	}
 	case 6: // Display
 	{
-		if (draw)
 		{
 			if (obj.memory.size() == 0)
 			{
@@ -224,13 +221,12 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			for (int i = 0; i < 7; i++)
 				obj.memory[i + 7] = displayStates[state / 10][i] ? 7 : 0;
 
-			drawObj(obj);
+			//drawObj(obj);
 		}
 		return;
 	}
 	case 7: // Color led
 	{
-		if (draw)
 		{
 			if (obj.memory.size() == 0)
 				obj.memory.push_back(0);
@@ -246,7 +242,7 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 			if (result != obj.memory[0])
 			{
 				obj.memory[0] = result;
-				drawObj(obj);
+				//drawObj(obj);
 			}
 		}
 		return;
@@ -368,7 +364,7 @@ void logic(Obj &obj, Board &b, std::vector<bool> &grupsGet, std::vector<bool> &g
 				obj.memory[i] = obj.memory[64 + i];
 				obj.memory[64 + i] = 0;
 			}
-			drawObj(obj);
+			//drawObj(obj);
 		} else if (get(b, grupsGet, obj, objt, 1)) {
 			unsigned int number = 0;
 			if (get(b, grupsGet, obj, objt, 2)) number |= 0b1;

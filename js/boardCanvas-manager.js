@@ -29,7 +29,7 @@ function resizeCanvas() {
     canvas.temp.width = canvas.background.width;
     canvas.temp.height = canvas.background.height;
 
-    refreshAllCanvas();
+    requestDrawAll = true;
 }
 
 function refreshCanvasBackground() {
@@ -69,7 +69,6 @@ function refreshCanvasObj() {
 }
 
 function refreshCanvasTemp() {
-    refreshCanvasBackground();
     canvas.ctxt.clearRect(0, 0, canvas.temp.width, canvas.temp.height);
     if (select) {
         if (canvas.wireTemp != undefined) {
@@ -159,8 +158,28 @@ function refreshAllCanvas() {
     refreshCanvasObj();
     refreshCanvasTemp();
 }
+
+let requestDrawAll = false;
+let requestDrawObjWire = false;
+
+
+function animationFrame() {
+    requestAnimationFrame(animationFrame);
+    
+    if (requestDrawAll || board.state == "play") {
+        refreshAllCanvas();
+    } else if (requestDrawObjWire) {
+        refreshCanvasObj();
+        refreshCanvasWires();
+    }
+    
+    requestDrawAll = false;
+    requestDrawObjWire = false;
+}
+
 addEventListener("init-env", () => {
     canvas.c = document.getElementById('content');
     canvas.leftBar = document.getElementById('leftBar');
     window.addEventListener('resize', resizeCanvas);
+    requestAnimationFrame(animationFrame);
 });

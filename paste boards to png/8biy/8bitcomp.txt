@@ -1,0 +1,72 @@
+
+r0
+r1
+r2
+r3
+
+d0 -> BULLET-POS
+d1 -> SHIP-POS
+d2 -> METEOROS-COUNT
+d3 -> 
+
+def UP-LEFT 1110 1110
+def UP 1110 1111
+def DOWN 0001 0000
+
+START-AST:
+    
+DRAW-SHIP:
+    
+    copy SHIP-POS to r0
+    led r0
+    ++ r0
+    led r0
+    ++ r0
+    led r0
+    set r1
+    UP-LEFT
+    
+DRAW-BULLET:
+    
+    copy BULLET-POS to r0
+    led r0
+    
+DRAW-METEOROS:
+    copy METEOROS-COUNT to r2
+DRAW-METEOROS-LOOP:
+    copy ram[r2] to r0
+    led r0
+    -- r2
+    jno
+    DRAW-METEOROS-LOOP
+    
+    frame
+THOROW-BULLET:
+    if-not-arrow-left
+    MOVE
+    
+    set ra
+    UP
+    copy BULLET-POS to 
+MOVE:
+    if-not-arrow-left
+    CONTINUE
+    
+    -- d1
+    jno
+    CONTINUE
+    
+    ++ d1
+    
+    if-not-arrow-right
+    CONTINUE
+    
+    ++ d1
+    set ra
+    0000 1110
+    copy d1 to ra
+    
+    cjno
+    CONTINUE
+    
+    -- d1

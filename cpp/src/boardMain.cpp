@@ -4,6 +4,7 @@
 #endif
 
 #include <emscripten.h>
+#include <thread>
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -30,7 +31,9 @@ void pushActionGrup(const std::vector<Action>& actionGrup) {
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
-void stopRun(int boardID) {
+void stopRun() {
+    stop_run_thread();
+    
     for (std::map<int64_t, WireChunk>::iterator it = board.wiresMap.begin(); it != board.wiresMap.end(); ++it) {
         for (int i = 0; i < WireChunkSize * WireChunkSize * 2; i++) {
             it->second.wiresGrup[i] = -1;
@@ -127,7 +130,7 @@ bool canAddAllSegWire(Pos topLeftCh, Pos bottomRightCh) {
     return true;
 }
 
-bool canAddWire(int boardID, int ax, int ay, int bx, int by, int cx, int cy)
+bool canAddWire(int ax, int ay, int bx, int by, int cx, int cy)
 {
     if (ay == by) {
         if (ax == bx) {
@@ -163,7 +166,7 @@ void changeNode(int x, int y, std::vector<Action>* actionGrup = nullptr) {
     if (board.getWire(x, y, 1)) count++;
     if (board.getWire(x - 1, y, 0)) count++;
     if (board.getWire(x, y - 1, 1)) count++;
-
+    
     if (count < 3) {
         auto node = board.getWireNode(x, y);
         if (node) {
@@ -190,10 +193,10 @@ void setSegWire(std::vector<Action>& actionGrup, bool set, int x, int y, int d) 
     }
 }
 
-void setWire(int boardID, bool set, int ax, int ay, int bx, int by, int cx, int cy)
+void setWire(bool set, int ax, int ay, int bx, int by, int cx, int cy)
 {
     if (set) {
-        if (!canAddWire(boardID, ax, ay, bx, by, cx, cy)) return;
+        if (!canAddWire(ax, ay, bx, by, cx, cy)) return;
     }
 
     std::vector<Action> actionGrup;
@@ -270,6 +273,8 @@ void swapNode(int x, int y, std::vector<Action>* actionGrup = nullptr)
         if (actionGrup != nullptr)
             actionGrup->emplace_back(x, y);
     }
+    
+    std::cout << " -" << board.getWireNode(x, y) << " count: " << count << "\n";
 }
 
 void client_swapNode(int x, int y) {
@@ -278,7 +283,7 @@ void client_swapNode(int x, int y) {
     pushActionGrup(actionGrup);
 }
 
-void drawWires(int boardID, double scale, double rectX, double rectY, double rectW, double rectH)
+void drawWires(double scale, double rectX, double rectY, double rectW, double rectH)
 {
     EM_ASM(canvas.ctxw.fillStyle = "#3E3");
     Pos chA = board.getWireChunkCoords(rectX, rectY);
@@ -333,7 +338,7 @@ void drawWires(int boardID, double scale, double rectX, double rectY, double rec
     }
 }
 
-void removeObj(int boardID, int x, int y, bool makeUndo)
+void removeObj(int x, int y, bool makeUndo)
 {
     Pos chPos = board.getObjChunkCoords(x, y);
     for (int cy = chPos.y - 1; cy <= chPos.y + 1; ++cy)
@@ -356,7 +361,7 @@ void removeObj(int boardID, int x, int y, bool makeUndo)
     }
 }
 
-bool canAddObj(int boardID, int x, int y, int typeID, int rotate)
+bool canAddObj(int x, int y, int typeID, int rotate)
 {
     const Obj thisObj(x, y, typeID, rotate);
     int w = thisObj.getWidth();
@@ -413,7 +418,7 @@ bool swapObjNot(int x, int y, int d, bool makeUndo) {
     return false;
 }
 
-bool clickEvent(int boardID, int x, int y, bool make_undo) // mouse client
+bool clickEvent(int x, int y, bool make_undo) // mouse client
 {
     Obj* obj = board.getObjAt(x, y);
     if (obj != nullptr) {
@@ -460,9 +465,9 @@ bool clickEvent(int boardID, int x, int y, bool make_undo) // mouse client
     return false;
 }
 
-void addObj(int boardID, int x, int y, int typeID, int rotate, bool makeUndo)
+void addObj(int x, int y, int typeID, int rotate, bool makeUndo)
 {
-    if (canAddObj(boardID, x, y, typeID, rotate)) {
+    if (canAddObj(x, y, typeID, rotate)) {
         Obj obj(x, y, typeID, rotate);
         board.objsMap[board.getObjChunkCoords(x, y).hash()].objs.push_back(obj);
         if (makeUndo) {
@@ -487,7 +492,7 @@ void drawObj(const Obj& obj) {
     }
 }
 
-void drawObjs(int boardID, double scale, double rectX, double rectY, double rectW, double rectH)
+void drawObjs(double scale, double rectX, double rectY, double rectW, double rectH)
 {
     Pos chA = board.getObjChunkCoords(rectX, rectY);
     Pos chB = board.getObjChunkCoords(rectX + rectW, rectY + rectH);
@@ -539,7 +544,7 @@ void propagateGrup(int x, int y, int d, bool first) {
     }
 }
 
-void initRun(int boardID)
+void initRun()
 {
     removeEmptyWireChunks();
     grups.clear();
@@ -570,32 +575,50 @@ void initRun(int boardID)
             }
         }
     }
+    
+    start_run_thread();
 }
 
-void runStep(int boardID, bool autoRefresh)
+bool use_async_run_step = false;
+bool waiting_for_run_thread = true;
+std::thread* runing_thread;
+
+void set_async(bool async_is_on) {
+    use_async_run_step = async_is_on;
+}
+
+void thread_loop() {
+    while (!waiting_for_run_thread) {
+        if (use_async_run_step) {
+            runStep();
+        } else {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
+}
+
+void start_run_thread() {
+    waiting_for_run_thread = false;
+    runing_thread = new std::thread(thread_loop);
+}
+void stop_run_thread() {
+    waiting_for_run_thread = true;
+    runing_thread->join();
+    delete runing_thread;
+}
+
+void runStep()
 {
     std::vector<bool> grupsSet(grups.size());
 
     for (std::map<int64_t, ObjChunk>::iterator it = board.objsMap.begin(); it != board.objsMap.end(); ++it) {
         for (int i = 0; i < it->second.objs.size(); ++i) {
-            logic(it->second.objs[i], board, grups, grupsSet, autoRefresh);
+            logic(it->second.objs[i], board, grups, grupsSet);
         }
     }
-
-    bool wireChanges = false;
+    
     for (int i = 0; i < grups.size(); i++) {
-        if (grups[i] != grupsSet[i]) {
-            wireChanges = true;
-            grups[i] = grupsSet[i];
-        }
-    }
-
-    if (autoRefresh && (board.needRefresh || wireChanges)) {
-        EM_ASM(refreshCanvasWires(););
-        board.needRefresh = false;
-    }
-    else if (wireChanges) {
-        board.needRefresh = true;
+        grups[i] = grupsSet[i];
     }
 }
 
@@ -643,21 +666,6 @@ bool selectRect(int rectX, int rectY, int rectW, int rectH)
     for (int chx = chA.x; chx <= chB.x; chx++)
     for (int chy = chA.y; chy <= chB.y; chy++)
     {
-        for (int x = MAX(chx * WireChunkSize, rectX); x < MIN((chx + 1) * WireChunkSize, rectX + rectW + 1); x++)
-        for (int y = MAX(chy * WireChunkSize, rectY); y < MIN((chy + 1) * WireChunkSize, rectY + rectH + 1); y++)
-        {
-            if (board.getWireNode(x, y)) {
-                board.getWireNode(x, y) = false;
-                actionGrup.emplace_back(x, y);
-                selectedNodes.emplace_back(x, y);
-            }
-        }
-    }
-
-
-    for (int chx = chA.x; chx <= chB.x; chx++)
-    for (int chy = chA.y; chy <= chB.y; chy++)
-    {
         int count = 0;
         for (int x = MAX(chx * WireChunkSize, rectX); x < MIN((chx+1) * WireChunkSize, rectX + rectW + 1); x++)
         for (int y = MAX(chy * WireChunkSize, rectY); y < MIN((chy+1) * WireChunkSize, rectY + rectH + 1); y++)
@@ -675,9 +683,20 @@ bool selectRect(int rectX, int rectY, int rectW, int rectH)
             }
         }
     }
-
-    for (const auto& node : selectedNodes) {
-        changeNode(node.x, node.y);
+    
+    for (int chx = chA.x; chx <= chB.x; chx++)
+    for (int chy = chA.y; chy <= chB.y; chy++)
+    {
+        for (int x = MAX(chx * WireChunkSize, rectX); x < MIN((chx + 1) * WireChunkSize, rectX + rectW + 1); x++)
+        for (int y = MAX(chy * WireChunkSize, rectY); y < MIN((chy + 1) * WireChunkSize, rectY + rectH + 1); y++)
+        {
+            if (board.getWireNode(x, y)) {
+                board.getWireNode(x, y) = false;
+                actionGrup.emplace_back(x, y);
+                selectedNodes.emplace_back(x, y);
+            }
+            changeNode(x, y, &actionGrup);
+        }
     }
     
     if (selectedObjs.size() != 0 || selectedWires.size() != 0 || selectedNodes.size() != 0) {
@@ -770,7 +789,7 @@ void rotateSelected(int r)
 bool canUnSelect()
 {
     for (const auto& obj : selectedObjs) {
-        if (!canAddObj(0, obj.x, obj.y, obj.typeID, obj.rotate))
+        if (!canAddObj(obj.x, obj.y, obj.typeID, obj.rotate))
             return false;
     }
     
@@ -811,7 +830,7 @@ void unSelect()
 
             for (const auto& w : selectedWires) {
                 changeNode(w.x, w.y);
-                changeNode(w.x + 1-w.d, w.y + w.d);
+                changeNode(w.x - 1+w.d, w.y + w.d);
             }
 
             deleteSelected();
@@ -913,25 +932,23 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
     if (actionsRegister.size() > 0) {
         std::vector<Action>& actionGrup = actionsRegister.back();
         std::vector<sNode> nodes;
-        
+        std::cout << "Undo\n";
         for (int i = 0; i < actionGrup.size(); i++) {
             if (addReverse) i = actionGrup.size() - i - 1;
+            std::cout << " |" << (int)actionGrup[i].type << "\n";
             if (actionGrup[i].type == Action::Type::SetSegWire) {
+                std::cout << "Set Seg " << (actionGrup[i].set != addReverse) << "\n";
                 nodes.emplace_back(actionGrup[i].x, actionGrup[i].y);
                 if (actionGrup[i].d == 0) nodes.emplace_back(actionGrup[i].x+1, actionGrup[i].y);
                 else nodes.emplace_back(actionGrup[i].x, actionGrup[i].y+1);
                 board.getWire(actionGrup[i].x, actionGrup[i].y, actionGrup[i].d) = (actionGrup[i].set != addReverse);
             }
-            else if (actionGrup[i].type == Action::Type::SwapNode) {
-                nodes.emplace_back(actionGrup[i].x, actionGrup[i].y);
-                swapNode(actionGrup[i].x, actionGrup[i].y);
-            }
             else if (actionGrup[i].type == Action::Type::SetObj) {
                 if (actionGrup[i].set == addReverse) {
-                    removeObj(0, actionGrup[i].x, actionGrup[i].y, false);
+                    removeObj(actionGrup[i].x, actionGrup[i].y, false);
                 }
                 else {
-                    if (canAddObj(0, actionGrup[i].x, actionGrup[i].y, actionGrup[i].typeID, actionGrup[i].rotate)) {
+                    if (canAddObj(actionGrup[i].x, actionGrup[i].y, actionGrup[i].typeID, actionGrup[i].rotate)) {
                         Obj obj(actionGrup[i].x, actionGrup[i].y, actionGrup[i].typeID, actionGrup[i].rotate);
                         obj.wireNot = actionGrup[i].wireNot;
                         obj.longMemory = actionGrup[i].longMemory;
@@ -945,14 +962,21 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
             else if (actionGrup[i].type == Action::Type::Select) {
                 deleteSelected();
             } else if (actionGrup[i].type == Action::Type::longMemClick) {
-                clickEvent(0, actionGrup[i].x, actionGrup[i].y, false);
+                clickEvent(actionGrup[i].x, actionGrup[i].y, false);
             }
             if (addReverse) i = actionGrup.size() - i - 1;
         }
-
+        
         for (auto node : nodes) {
             changeNode(node.x, node.y);
         }
+        
+        for (int i = 0; i < actionGrup.size(); i++) {
+            if (actionGrup[i].type == Action::Type::SwapNode) {
+                swapNode(actionGrup[i].x, actionGrup[i].y);
+            }
+        }
+        
 
         if (addReverse) undoActionsRegister.push_back(actionGrup);
         actionsRegister.pop_back();

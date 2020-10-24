@@ -11,7 +11,7 @@ class Board {
         this.state = "edit";
 
         if (boardMemory == undefined) {
-            this.id = Module.__createBoard(this.boardID);
+            this.id = Module.__createBoard();
         } else {
 
         }
@@ -23,34 +23,38 @@ class Board {
     }
 
     initRun() {
-        Module.__initRun(this.boardID);
+        Module.__initRun();
     }
 
     stopRun() {
         if (this.state != "edit") {
-            Module.__stopRun(this.boardID);
+            Module.__stopRun();
             this.state = "edit";
-            refreshAllCanvas();
+            requestDrawAll = true;
             updateButtonsPlayStop();
         }
     }
+    
+    set_async_run(async_is_on) {
+        Module.__set_async(async_is_on);
+    }
 
-    runStep(draw) {
-        Module.__runStep(this.boardID, draw == true);
+    runStep() {
+        Module.__runStep();
     }
 
     addWire(pa, pb, pc) {
         if (this.state == "edit")
-            Module.__setWire(this.boardID, true, pa.x, pa.y, pb.x, pb.y, pc.x, pc.y);
+            Module.__setWire(true, pa.x, pa.y, pb.x, pb.y, pc.x, pc.y);
     }
 
     canAddWire(pa, pb, pc) {
-        return Module.__canAddWire(this.boardID, pa.x, pa.y, pb.x, pb.y, pc.x, pc.y);
+        return Module.__canAddWire(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y);
     }
 
     swapNode(p) {
         this.stopRun();
-        Module.__swapNode(this.boardID, p.x, p.y);
+        Module.__swapNode(p.x, p.y);
     }
 
     swapObjNot(p, d) {
@@ -58,35 +62,35 @@ class Board {
     }
 
     clickEvent(p) {
-        return Module.__clickEvent(this.boardID, p.x, p.y);
+        return Module.__clickEvent(p.x, p.y);
     }
 
     removeWire(pa, pb, pc) {
         this.stopRun();
-        Module.__setWire(this.boardID, false, pa.x, pa.y, pb.x, pb.y, pc.x, pc.y);
+        Module.__setWire(false, pa.x, pa.y, pb.x, pb.y, pc.x, pc.y);
     }
 
     addObj(p, objType) {
         this.stopRun();
-        Module.__addObj(this.boardID, p.x, p.y, objType, getRotateOfObj(objTypes[objType].name));
+        Module.__addObj(p.x, p.y, objType, getRotateOfObj(objTypes[objType].name));
     }
 
     canAddObj(objType, p) {
-        return Module.__canAddObj(this.boardID, p.x, p.y, objType, getRotateOfObj(objTypes[objType].name));
+        return Module.__canAddObj(p.x, p.y, objType, getRotateOfObj(objTypes[objType].name));
     }
 
     removeObj(p) {
         this.stopRun();
-        Module.__removeObj(this.boardID, p.x, p.y);
+        Module.__removeObj(p.x, p.y);
     }
 
     drawWires() {
-        return Module.__drawWires(this.boardID, this.scale, this.x / this.scale, this.y / this.scale,
+        return Module.__drawWires(this.scale, this.x / this.scale, this.y / this.scale,
             canvas.obj.width / this.scale, canvas.obj.height / this.scale);
     }
 
     drawObjs() {
-        return Module.__drawObjs(this.boardID, this.scale, this.x / this.scale, this.y / this.scale,
+        return Module.__drawObjs(this.scale, this.x / this.scale, this.y / this.scale,
             canvas.obj.width / this.scale, canvas.obj.height / this.scale);
     }
 
@@ -95,14 +99,14 @@ class Board {
         select = false;
         this.stopRun();
         Module.__undoAction();
-        refreshAllCanvas();
+        requestDrawAll = true;
     }
 
     reverseUndo() {
         select = false;
         this.stopRun();
         Module.__reverseUndo();
-        refreshAllCanvas();
+        requestDrawAll = true;
     }
 
     //Select
@@ -130,7 +134,7 @@ class Board {
     unSelect() {
         Module.__unSelect();
         select = false;
-        refreshAllCanvas();
+        requestDrawAll = true;
     }
 
     drawSelect() {
@@ -140,7 +144,7 @@ class Board {
     duplicateSelected() {
         if (select) {
             Module.__duplicateSelected();
-            refreshAllCanvas();
+            requestDrawAll = true;
         }
     }
 
@@ -155,7 +159,7 @@ class Board {
         if (Module.__pasteSelected()) {
             selectPalet(0, false);
             select = true;
-            refreshAllCanvas();
+            requestDrawAll = true;
         }
     }
 }

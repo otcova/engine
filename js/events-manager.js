@@ -4,8 +4,8 @@ addEventListener("init-env", () => {
             canvas.wireTempStatic = true;
             canvas.wireTemp = [getMousePos(), getMousePos()];
             canvas.wireDir = "h";
-            refreshCanvasTemp();
-            
+            requestDrawAll = true;
+
             // move Select mouse down
             canvas.movSel = canvas.wireTemp[0];
         }
@@ -14,7 +14,7 @@ addEventListener("init-env", () => {
     document.addEventListener("mouseup", function (e) {
         if (e.button == 0)
             canvas.wireTemp = undefined;
-        refreshCanvasTemp();
+        requestDrawAll = true;
     });
 
     canvas.c.addEventListener("mouseup", function (e) {
@@ -33,10 +33,9 @@ addEventListener("init-env", () => {
                         if (!board.clickEvent(canvas.wireTemp[1])) {
                             if (!board.swapObjNot(p, d)) {
                                 board.swapNode(canvas.wireTemp[1]);
-                                refreshCanvasWires();
                             }
                         }
-                        refreshCanvasObj();
+                        requestDrawAll = true;
                     } else {
                         board.clickEvent(canvas.wireTemp[1]);
                     }
@@ -53,11 +52,11 @@ addEventListener("init-env", () => {
                         }, canvas.wireTemp[1]);
                     }
                 }
-                refreshCanvasWires();
+                requestDrawAll = true;
             } else if (paletItems[paletIndex] == "Eraser") {
                 if (canvas.wireTemp[0].x == canvas.wireTemp[1].x && canvas.wireTemp[0].y == canvas.wireTemp[1].y) {
                     board.removeObj(canvas.wireTemp[1]);
-                    refreshCanvasObj();
+                    requestDrawAll = true;
                 } else {
                     if (canvas.wireDir == "h") {
                         board.removeWire(canvas.wireTemp[0], {
@@ -70,7 +69,7 @@ addEventListener("init-env", () => {
                             y: canvas.wireTemp[1].y
                         }, canvas.wireTemp[1]);
                     }
-                    refreshCanvasWires();
+                    requestDrawAll = true;
                 }
             } else if (paletItems[paletIndex] == "Select") {
                 let x0 = canvas.wireTemp[0].x;
@@ -90,7 +89,7 @@ addEventListener("init-env", () => {
                     }
                     select = board.selectRect(x0, y0, x1 - x0, y1 - y0);
                     canvas.wireTemp = undefined;
-                    refreshAllCanvas();
+                    requestDrawAll = true;
                 } else if (canvas.wireTempStatic) {
                     board.unSelect();
                 }
@@ -98,17 +97,17 @@ addEventListener("init-env", () => {
                 let id = getObjByName(paletItems[paletIndex]);
                 if (id != undefined) {
                     board.addObj(canvas.wireTemp[1], id);
-                    refreshCanvasObj();
+                    requestDrawAll = true;
                 }
             }
             canvas.wireTemp = undefined;
-            refreshCanvasTemp();
+            requestDrawAll = true;
         }
     });
 
     document.addEventListener("mousemove", function (e) {
         if (e.x < canvas.obj.offsetLeft || e.y < canvas.obj.offsetTop)
-            refreshCanvasTemp();
+            requestDrawAll = true;
     });
 
     canvas.c.addEventListener("mousemove", function (e) {
@@ -117,7 +116,7 @@ addEventListener("init-env", () => {
         if ((e.buttons & 2) > 0) { // RIGHT
             board.x += canvas.mouse.x - mX;
             board.y += canvas.mouse.y - mY;
-            refreshAllCanvas();
+            requestDrawAll = true;
         } else if ((e.buttons & 1) > 0 && canvas.wireTemp != undefined) {
             let mp = getMousePos();
             if (canvas.wireTemp[0].x == canvas.wireTemp[1].x && canvas.wireTemp[0].y == canvas.wireTemp[1].y && !(canvas.wireTemp[0].x == mp.x && canvas.wireTemp[0].y == mp.y)) {
@@ -130,7 +129,7 @@ addEventListener("init-env", () => {
             if (canvas.wireTemp[0].x != mp.x || canvas.wireTemp[0].y != mp.y) {
                 canvas.wireTempStatic = false;
             }
-            refreshCanvasTemp();
+            requestDrawAll = true;
         }
         canvas.mouse.x = mX;
         canvas.mouse.y = mY;
@@ -158,7 +157,7 @@ addEventListener("init-env", () => {
         let scaleRatio = board.scale / pastScale;
         board.x = parseInt(board.x + scaleRatio * (board.x + canvas.mouse.x) - (board.x + canvas.mouse.x));
         board.y = parseInt(board.y + scaleRatio * (board.y + canvas.mouse.y) - (board.y + canvas.mouse.y));
-        refreshAllCanvas();
+        requestDrawAll = true;
         e.preventDefault();
     });
 });
@@ -233,7 +232,7 @@ addEventListener("init-env", () => {
             deleteSharedArray(arr);
         }
 
-        refreshAllCanvas();
+        requestDrawAll = true;
     });
 });
 
@@ -241,21 +240,38 @@ document.oncontextmenu = function () {
     return false;
 }
 
-let lastRunInstance = 0;
-
-let notDrawCount = 0;
-let drawCount = 0;
-let runSpeed = 2;
+let runDelay = 1000;
 let sliderRunSpeed = document.getElementById("runSpeed");
-var sliderRunSpeedText = document.getElementById("runSpeedText");
+let sliderRunSpeedText = document.getElementById("runSpeedText");
+let runStepInterval = undefined;
+
 sliderRunSpeed.oninput = function () {
-    runSpeed = Math.round(this.value * this.value * this.value);
-    if (runSpeed === 0) sliderRunSpeedText.innerHTML = "speed snail";
-    else if (runSpeed === 1) sliderRunSpeedText.innerHTML = "speed turtle";
-    else if (runSpeed < 60) sliderRunSpeedText.innerHTML = "speed slow";
-    else if (runSpeed < 999) sliderRunSpeedText.innerHTML = "speed fast";
-    else sliderRunSpeedText.innerHTML = "speed max";
+    
+    if (runDelay == 0 && this.value != 1)
+        board.set_async_run(false);
+    runDelay = 500 - this.value * 500;
+    
+    console.log(runDelay);
+    
+    if (this.value <= .1) sliderRunSpeedText.innerHTML = "speed snail";
+    else if (this.value <= .2) sliderRunSpeedText.innerHTML = "speed turtle";
+    else if (this.value <= .5) sliderRunSpeedText.innerHTML = "speed slow";
+    else if (this.value < 1) sliderRunSpeedText.innerHTML = "speed fast";
+    else { 
+        runDelay = 0; 
+        if (board.state == "play") board.set_async_run(true);
+        sliderRunSpeedText.innerHTML = "speed async";
+    }
+
+    if (runStepInterval != undefined) clearInterval(runStepInterval);
+    runStepInterval = setInterval(() => {
+        if (board.state == "play" && runDelay > 0) {
+            board.runStep();
+        }
+    }, runDelay);
 }
+
+addEventListener("init-env", function () { sliderRunSpeed.oninput(); });
 
 Module.onRuntimeInitialized = function () {
 
@@ -264,21 +280,5 @@ Module.onRuntimeInitialized = function () {
 
     resizeCanvas();
     updateButtonsPlayStop();
-
-    setInterval(function () {
-        if (board.state == "play") {
-            let now = performance.now();
-            if (now - lastRunInstance < 50) {
-                for (let i = 0; i < runSpeed; i++) {
-                    board.runStep(false);
-                    notDrawCount++;
-                }
-            } else {
-                if (++drawCount % 100 == 0) console.log("run ticks: ", notDrawCount + drawCount);
-                board.runStep(true);
-                lastRunInstance = now;
-            }
-        }
-    }, 0);
 
 };
