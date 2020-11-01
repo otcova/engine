@@ -361,12 +361,12 @@ function drawObj(x, y, rotate, objID, ctx, red, ledPowerPtr, cNotsPtr, selected)
                 else ctx.fillStyle = "#FFF";
                 
 
-                rectX = x + led.x - 0.5 + 0.22;
-                rectY = y + led.y - 0.5 + 0.22;
-                rectW = led.w - 0.44;
-                rectH = led.h - 0.44;
-                ctx.fillRect(Math.round(rectX * board.scale - board.x), Math.round(rectY * board.scale - board.y),
-                    Math.round(rectW * board.scale), Math.round(rectH * board.scale));
+                rectX = x + led.x - led.w/2;// - 0.5 + 0.22;
+                rectY = y + led.y - led.h/2;// - 0.5 + 0.22;
+                rectW = led.w;// - 0.44;
+                rectH = led.h;// - 0.44;
+                ctx.fillRect((rectX * board.scale - board.x), (rectY * board.scale - board.y),
+                    (rectW * board.scale), (rectH * board.scale));
 
             }
             ++i;

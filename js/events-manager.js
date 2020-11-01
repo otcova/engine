@@ -240,6 +240,7 @@ document.oncontextmenu = function () {
     return false;
 }
 
+let runTickMultiply = 1;
 let runDelay = 1000;
 let sliderRunSpeed = document.getElementById("runSpeed");
 let sliderRunSpeedText = document.getElementById("runSpeedText");
@@ -247,26 +248,28 @@ let runStepInterval = undefined;
 
 sliderRunSpeed.oninput = function () {
     
-    if (runDelay == 0 && this.value != 1)
+    if (runDelay == -1 && this.value != 1)
         board.set_async_run(false);
-    runDelay = 500 - this.value * 500;
-    
-    console.log(runDelay);
-    
-    if (this.value <= .1) sliderRunSpeedText.innerHTML = "speed snail";
-    else if (this.value <= .2) sliderRunSpeedText.innerHTML = "speed turtle";
-    else if (this.value <= .5) sliderRunSpeedText.innerHTML = "speed slow";
-    else if (this.value < 1) sliderRunSpeedText.innerHTML = "speed fast";
+    runDelay = Math.max(0, 500 - this.value * 500 / 0.7);
+    runTickMultiply = 1;
+    if (this.value < .2) sliderRunSpeedText.innerHTML = "speed snail";
+    else if (this.value < .4) sliderRunSpeedText.innerHTML = "speed turtle";
+    else if (this.value < .7) sliderRunSpeedText.innerHTML = "speed slow";
+    else if (this.value < 1) {
+        sliderRunSpeedText.innerHTML = "speed fast"; 
+        runTickMultiply = 1 + Math.floor((this.value - 0.7) * 100); 
+    }
     else { 
-        runDelay = 0; 
+        runDelay = -1; 
         if (board.state == "play") board.set_async_run(true);
         sliderRunSpeedText.innerHTML = "speed async";
     }
 
     if (runStepInterval != undefined) clearInterval(runStepInterval);
     runStepInterval = setInterval(() => {
-        if (board.state == "play" && runDelay > 0) {
-            board.runStep();
+        if (board.state == "play" && runDelay != -1) {
+            for (let i = 0; i < runTickMultiply; i++)
+                board.runStep();
         }
     }, runDelay);
 }

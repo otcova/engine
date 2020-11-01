@@ -141,9 +141,11 @@ function keyPressEv(e) {
 
         else if (e.key == "s" && e.ctrlKey) {
             let wiresMapMemoryPtr = Module.__saveBoard();
-            console.log("Saved: ", (Module.HEAP32[wiresMapMemoryPtr / (32 / 8)] / 1024).toPrecision(2) + "KB");
-            let memory = new Uint8Array(Module.HEAP8.buffer, wiresMapMemoryPtr, Module.HEAP32[wiresMapMemoryPtr / (32 / 8)])
+            let memory;
+            if (Module.HEAP32.buffer.constructor.name == "SharedArrayBuffer") memory = sliceToNonShared(Module.HEAP8, wiresMapMemoryPtr, wiresMapMemoryPtr+Module.HEAP32[wiresMapMemoryPtr / (32 / 8)]);
+            else memory = new Uint8Array(Module.HEAP8.buffer, wiresMapMemoryPtr, Module.HEAP32[wiresMapMemoryPtr / (32 / 8)])
             saveDataToFile("board.cir", memory);
+            console.log("Saved: ", (Module.HEAP32[wiresMapMemoryPtr / (32 / 8)] / 1024).toPrecision(2) + "KB");
             requestDrawAll = true;
         }
 
@@ -173,6 +175,15 @@ function keyPressEv(e) {
     }
     requestDrawAll = true;
     if (e.key != "Control") keyRepeat = true;
+}
+
+function sliceToNonShared(bufferArray, start, end) {
+    if (end == undefined) end = bufferArray.length;
+    var result = new ArrayBuffer(end - start);
+    var resultArray = new Uint8Array(result);
+    for (var i = 0; i < resultArray.length; i++)
+       resultArray[i] = bufferArray[i + start];
+    return resultArray;
 }
 
 function rotateObjType(r) {
@@ -224,7 +235,7 @@ function updateButtonsPlayStop() {
 }
 
 function playButtonOnClick() {
-    if (runDelay == 0) board.set_async_run(true);
+    if (runDelay == -1) board.set_async_run(true);
     if (board.state == "edit") board.initRun();
     board.state = "play";
     updateButtonsPlayStop();

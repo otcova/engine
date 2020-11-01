@@ -35,7 +35,7 @@ void stopRun() {
     stop_run_thread();
     
     for (std::map<int64_t, WireChunk>::iterator it = board.wiresMap.begin(); it != board.wiresMap.end(); ++it) {
-        for (int i = 0; i < WireChunkSize * WireChunkSize * 2; i++) {
+        for (int i = 0; i < WireChunkSize * WireChunkSize * 2; ++i) {
             it->second.wiresGrup[i] = -1;
         }
     }
@@ -100,7 +100,7 @@ bool canAddSegWire(int x, int y, int d)
         {
             std::map<int64_t, ObjChunk>::iterator wchIt = board.objsMap.find(Pos(chx, chy).hash());
             if (wchIt != board.objsMap.end()) {
-                for (int i = 0; i < wchIt->second.objs.size(); i++) {
+                for (int i = 0; i < wchIt->second.objs.size(); ++i) {
                     if (objWiresCollision(wchIt->second.objs[i])) {
                         board.getWire(x, y, d) = false;
                         return false;
@@ -120,7 +120,7 @@ bool canAddAllSegWire(Pos topLeftCh, Pos bottomRightCh) {
     {
         std::map<int64_t, ObjChunk>::iterator wchIt = board.objsMap.find(Pos(chx, chy).hash());
         if (wchIt != board.objsMap.end()) {
-            for (int i = 0; i < wchIt->second.objs.size(); i++) {
+            for (int i = 0; i < wchIt->second.objs.size(); ++i) {
                 if (objWiresCollision(wchIt->second.objs[i])) {
                     return false;
                 }
@@ -274,7 +274,7 @@ void swapNode(int x, int y, std::vector<Action>* actionGrup = nullptr)
             actionGrup->emplace_back(x, y);
     }
     
-    std::cout << " -" << board.getWireNode(x, y) << " count: " << count << "\n";
+    //std::cout << " -" << board.getWireNode(x, y) << " count: " << count << "\n";
 }
 
 void client_swapNode(int x, int y) {
@@ -306,7 +306,7 @@ void drawWires(double scale, double rectX, double rectY, double rectW, double re
                         if (wch.local(x, y, 0)) {
                             int g = wch.localGrup(x, y, 0);
                             if (g != -1) if (!grups[g]) g = -1;
-                            if ((style == 0) == (g == -1)) {
+                            if (style == 0 || g != -1) {
                                 EM_ASM({
                                     canvas.ctxw.moveTo($0 - $3, $1 + 0.5);
                                     canvas.ctxw.lineTo($0 + $2 + $3*2, $1 + 0.5);
@@ -316,7 +316,7 @@ void drawWires(double scale, double rectX, double rectY, double rectW, double re
                         if (wch.local(x, y, 1)) {
                             int g = wch.localGrup(x, y, 1);
                             if (g != -1) if (!grups[g]) g = -1;
-                            if ((style == 0) == (g == -1)) {
+                            if (style == 0 || g != -1) {
                                 EM_ASM({
                                     canvas.ctxw.moveTo($0 + 0.5, $1 - $3);
                                     canvas.ctxw.lineTo($0 + 0.5, $1 + $2 + $3*2);
@@ -345,7 +345,7 @@ void removeObj(int x, int y, bool makeUndo)
     for (int cx = chPos.x - 1; cx <= chPos.x + 1; ++cx) {
         std::map<int64_t, ObjChunk>::iterator wchIt = board.objsMap.find(Pos(cx, cy).hash());
         if (wchIt != board.objsMap.end()) {
-            for (int i = 0; i < wchIt->second.objs.size(); i++) {
+            for (int i = 0; i < wchIt->second.objs.size(); ++i) {
                 if (checkCollide(x, y, 0, 0, wchIt->second.objs[i].x, wchIt->second.objs[i].y,
                     wchIt->second.objs[i].getWidth(), wchIt->second.objs[i].getHeight())) {
                     if (makeUndo) {
@@ -375,7 +375,7 @@ bool canAddObj(int x, int y, int typeID, int rotate)
     {
         std::map<int64_t, ObjChunk>::iterator wchIt = board.objsMap.find(Pos(chx, chy).hash());
         if (wchIt != board.objsMap.end()) {
-            for (int i = 0; i < wchIt->second.objs.size(); i++) {
+            for (int i = 0; i < wchIt->second.objs.size(); ++i) {
                 if (checkCollide(x, y, w, h, wchIt->second.objs[i].x, wchIt->second.objs[i].y, 
                     wchIt->second.objs[i].getWidth(), wchIt->second.objs[i].getHeight())) {
                     return false;
@@ -393,7 +393,7 @@ bool swapObjNot(int x, int y, int d, bool makeUndo) {
     for (int cx = chPos.x - 1; cx <= chPos.x+1; ++cx) {
         std::map<int64_t, ObjChunk>::iterator wchIt = board.objsMap.find(Pos(cx, cy).hash());
         if (wchIt != board.objsMap.end()) {
-            for (int i = 0; i < wchIt->second.objs.size(); i++) {
+            for (int i = 0; i < wchIt->second.objs.size(); ++i) {
                 const ObjType& objt = getObjType(wchIt->second.objs[i].typeID);
                 int ci = 0;
                 for (const WireConectionType& c : objt.c) {
@@ -436,7 +436,7 @@ bool clickEvent(int x, int y, bool make_undo) // mouse client
             int size = obj->typeID - 78;
             if (obj->longMemory.size() == 0) {
                 obj->longMemory.reserve(size);
-                for (int i = 0; i < size; i++) {
+                for (int i = 0; i < size; ++i) {
                     obj->longMemory.push_back(0);
                 }
             }
@@ -473,6 +473,26 @@ void addObj(int x, int y, int typeID, int rotate, bool makeUndo)
         if (makeUndo) {
             std::vector<Action> actionGrup;
             actionGrup.emplace_back(true, x, y, typeID, rotate, obj.wireNot);
+            
+            ObjType objType = getObjType(typeID);
+            for (auto& cType : objType.c) {
+                cType.rotate(objType, rotate);
+                int ox = cType.x;
+                int oy = cType.y;
+                if (ox >= 0 && oy >= 0) {
+                    ox += 1 - cType.d;
+                    oy += cType.d;
+                }
+                Obj* obj = board.getObjAt(ox + x, oy + y);
+                if (obj != nullptr) {
+                    WireConectionType* oct = obj->getWireNotAt(cType.x+x, cType.y+y, cType.d);
+                    if (oct != nullptr) {
+                        if (!(oct->hide && cType.hide))
+                            setSegWire(actionGrup, true, cType.x + x, cType.y + y, cType.d);
+                    }
+                }
+            }
+            
             pushActionGrup(actionGrup);
         }
     }
@@ -502,7 +522,7 @@ void drawObjs(double scale, double rectX, double rectY, double rectW, double rec
     {
         std::map<int64_t, ObjChunk>::iterator wchIt = board.objsMap.find(Pos(chx, chy).hash());
         if (wchIt != board.objsMap.end()) {
-            for (int i = 0; i < wchIt->second.objs.size(); i++)
+            for (int i = 0; i < wchIt->second.objs.size(); ++i)
                 drawObj(wchIt->second.objs[i]);
         }
     }
@@ -544,6 +564,8 @@ void propagateGrup(int x, int y, int d, bool first) {
     }
 }
 
+std::vector<Obj*> runObjsList;
+
 void initRun()
 {
     removeEmptyWireChunks();
@@ -553,7 +575,7 @@ void initRun()
 
     for (std::map<int64_t, WireChunk>::iterator it = board.wiresMap.begin(); it != board.wiresMap.end(); ++it) {
         int wiresCount = 0;
-        for (int i = 0; i < WireChunkSize * WireChunkSize * 2; i++) {
+        for (int i = 0; i < WireChunkSize * WireChunkSize * 2; ++i) {
             it->second.wiresGrup[i] = -1;
             if (it->second.wiresActive[i]) ++wiresCount;
         }
@@ -573,6 +595,14 @@ void initRun()
                     propagateGrup(x + chPos->x * WireChunkSize, y + chPos->y * WireChunkSize, d, true);
                 }
             }
+        }
+    }
+    
+    runObjsList.clear();
+    for (std::map<int64_t, ObjChunk>::iterator it = board.objsMap.begin(); it != board.objsMap.end(); ++it) {
+        for (int i = 0; i < it->second.objs.size(); ++i) {
+            initLogicMemory(it->second.objs[i]);
+            runObjsList.push_back(&it->second.objs[i]);
         }
     }
     
@@ -610,14 +640,12 @@ void stop_run_thread() {
 void runStep()
 {
     std::vector<bool> grupsSet(grups.size());
-
-    for (std::map<int64_t, ObjChunk>::iterator it = board.objsMap.begin(); it != board.objsMap.end(); ++it) {
-        for (int i = 0; i < it->second.objs.size(); ++i) {
-            logic(it->second.objs[i], board, grups, grupsSet);
-        }
+    
+    for (size_t i = 0; i < runObjsList.size(); ++i) {
+        logic(*runObjsList[i], board, grups, grupsSet);
     }
     
-    for (int i = 0; i < grups.size(); i++) {
+    for (int i = 0; i < grups.size(); ++i) {
         grups[i] = grupsSet[i];
     }
 }
@@ -648,7 +676,7 @@ bool selectRect(int rectX, int rectY, int rectW, int rectH)
     {
         std::map<int64_t, ObjChunk>::iterator wchIt = board.objsMap.find(Pos(chx, chy).hash());
         if (wchIt != board.objsMap.end()) {
-            for (int i = 0; i < wchIt->second.objs.size(); i++) {
+            for (int i = 0; i < wchIt->second.objs.size(); ++i) {
                 if (checkCollide(rectX, rectY, rectW, rectH, wchIt->second.objs[i].x, wchIt->second.objs[i].y, wchIt->second.objs[i].getWidth(), wchIt->second.objs[i].getHeight())) {
                     wchIt->second.objs[i].memory.clear();
                     selectedObjs.push_back(wchIt->second.objs[i]);
@@ -720,17 +748,17 @@ void moveSelected(int dx, int dy)
     selectedX += dx;
     selectedY += dy;
 
-    for (int i = 0; i < selectedObjs.size(); i++) {
+    for (int i = 0; i < selectedObjs.size(); ++i) {
         selectedObjs[i].x += dx;
         selectedObjs[i].y += dy;
     }
 
-    for (int i = 0; i < selectedWires.size(); i++) {
+    for (int i = 0; i < selectedWires.size(); ++i) {
         selectedWires[i].x += dx;
         selectedWires[i].y += dy;
     }
 
-    for (int i = 0; i < selectedNodes.size(); i++) {
+    for (int i = 0; i < selectedNodes.size(); ++i) {
         selectedNodes[i].x += dx;
         selectedNodes[i].y += dy;
     }
@@ -738,10 +766,9 @@ void moveSelected(int dx, int dy)
 
 void rotateSelected(int r)
 {
-    //int r = mod(rotate - selectedR, 4);
     selectedR += r;
     int w, h;
-    for (int i = 0; i < selectedObjs.size(); i++) {
+    for (int i = 0; i < selectedObjs.size(); ++i) {
         w = selectedW;
         h = selectedH;
         for (int n = 0; n < r; n++) {
@@ -755,7 +782,7 @@ void rotateSelected(int r)
         }
     }
 
-    for (int i = 0; i < selectedWires.size(); i++) {
+    for (int i = 0; i < selectedWires.size(); ++i) {
         w = selectedW;
         h = selectedH;
         for (int n = 0; n < r; n++) {
@@ -769,7 +796,7 @@ void rotateSelected(int r)
         }
     }
 
-    for (int i = 0; i < selectedNodes.size(); i++) {
+    for (int i = 0; i < selectedNodes.size(); ++i) {
         w = selectedW;
         h = selectedH;
         for (int n = 0; n < r; n++) {
@@ -932,12 +959,12 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
     if (actionsRegister.size() > 0) {
         std::vector<Action>& actionGrup = actionsRegister.back();
         std::vector<sNode> nodes;
-        std::cout << "Undo\n";
-        for (int i = 0; i < actionGrup.size(); i++) {
+        //std::cout << "Undo\n";
+        for (int i = 0; i < actionGrup.size(); ++i) {
             if (addReverse) i = actionGrup.size() - i - 1;
-            std::cout << " |" << (int)actionGrup[i].type << "\n";
+            //std::cout << " |" << (int)actionGrup[i].type << "\n";
             if (actionGrup[i].type == Action::Type::SetSegWire) {
-                std::cout << "Set Seg " << (actionGrup[i].set != addReverse) << "\n";
+                //std::cout << "Set Seg " << (actionGrup[i].set != addReverse) << "\n";
                 nodes.emplace_back(actionGrup[i].x, actionGrup[i].y);
                 if (actionGrup[i].d == 0) nodes.emplace_back(actionGrup[i].x+1, actionGrup[i].y);
                 else nodes.emplace_back(actionGrup[i].x, actionGrup[i].y+1);
@@ -971,7 +998,7 @@ void internalUndoAction(std::vector<std::vector<Action>>& actionsRegister, bool 
             changeNode(node.x, node.y);
         }
         
-        for (int i = 0; i < actionGrup.size(); i++) {
+        for (int i = 0; i < actionGrup.size(); ++i) {
             if (actionGrup[i].type == Action::Type::SwapNode) {
                 swapNode(actionGrup[i].x, actionGrup[i].y);
             }
@@ -1029,18 +1056,18 @@ void LoadBoard(void* datav) {
         pair.second = ObjChunk();
         int objsLen = *(int*)data;
         data += sizeof(int);
-        for (int i = 0; i < objsLen; i++) {
+        for (int i = 0; i < objsLen; ++i) {
             int typeID = ((int*)data)[2];
             pair.second.objs.emplace_back(((int*)data)[0], ((int*)data)[1], typeID, ((int*)data)[3]);
             int wireNotLen = ((int*)data)[4];
             int longMemoryLen = ((int*)data)[5];
             data += sizeof(int) * 6;
-            for (int wni = 0; wni < wireNotLen; wni++) {
+            for (int wni = 0; wni < wireNotLen; ++wni) {
                 pair.second.objs[i].wireNot[wni] = *data;
                 data += sizeof(char);
             }
             pair.second.objs[i].longMemory.reserve(longMemoryLen);
-            for (int memi = 0; memi < longMemoryLen; memi++) {
+            for (int memi = 0; memi < longMemoryLen; ++memi) {
                 pair.second.objs[i].longMemory.push_back(*data);
                 data += sizeof(char);
             }
@@ -1057,7 +1084,7 @@ void* SaveBoard() {
     int32_t objMemorySize = board.objsMap.size() * (sizeof(int) + sizeof(int64_t));
     for (const auto& [chPos, oCh] : board.objsMap) {
         objMemorySize += oCh.objs.size() * 6 * sizeof(int);
-        for (int oi = 0; oi < oCh.objs.size(); oi++) {
+        for (int oi = 0; oi < oCh.objs.size(); ++oi) {
             objMemorySize += oCh.objs[oi].wireNot.size() * sizeof(char);
             objMemorySize += oCh.objs[oi].longMemory.size() * sizeof(char);
         }
@@ -1093,11 +1120,11 @@ void* SaveBoard() {
             ((int*)data)[4] = oCh.objs[oi].wireNot.size();
             ((int*)data)[5] = oCh.objs[oi].longMemory.size();
             data += sizeof(int) * 6;
-            for (int wni = 0; wni < oCh.objs[oi].wireNot.size(); wni++) {
+            for (int wni = 0; wni < oCh.objs[oi].wireNot.size(); ++wni) {
                 *data = oCh.objs[oi].wireNot[wni];
                 data += sizeof(char);
             }
-            for (int memi = 0; memi < oCh.objs[oi].longMemory.size(); memi++) {
+            for (int memi = 0; memi < oCh.objs[oi].longMemory.size(); ++memi) {
                 *data = oCh.objs[oi].longMemory[memi];
                 data += sizeof(char);
             }

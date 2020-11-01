@@ -221,6 +221,15 @@ struct Obj
     {
         return rotate % 2 == 0 ? getObjType(typeID).h : getObjType(typeID).w;
     }
+    inline WireConectionType* getWireNotAt(int wx, int wy, int wd) {
+        ObjType objType = getObjType(typeID);
+        for (auto& cType : objType.c) {
+            cType.rotate(objType, rotate);
+            if (wx == cType.x + x && wy == cType.y + y && wd == cType.d)
+                return &cType;
+        }
+        return nullptr;
+    }
 };
 
 inline bool checkCollide(const int &x1, const int &y1, const int &w1, const int &h1, const int &x2, const int &y2, const int &w2, const int &h2)
